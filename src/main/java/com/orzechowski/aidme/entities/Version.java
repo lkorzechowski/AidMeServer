@@ -1,13 +1,27 @@
 package com.orzechowski.aidme.entities;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "versions")
 public class Version
 {
+    @Id
     private long versionId;
+    @Column(name = "text", nullable = false)
     private final String text;
+    @Column(name = "tutorial_id", nullable = false)
     private final long tutorialId;
+    @Column(name = "delay_global_sound", nullable = false)
     private final boolean delayGlobalSound;
+    @Column(name = "has_children", nullable = false)
     private final boolean hasChildren;
+    @Column(name = "has_parent", nullable = false)
     private final boolean hasParent;
+    @Column(name = "parent_version_id")
     private long parentVersionId;
 
     public Version(String text, long tutorialId, boolean delayGlobalSound, boolean hasChildren, boolean hasParent)

@@ -1,11 +1,23 @@
 package com.orzechowski.aidme.entities;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "tutorials")
 public class Tutorial
 {
+    @Id
     private long tutorialId;
+    @Column(name = "tutorial_name", nullable = false)
     private final String tutorialName;
+    @Column(name = "author_id", nullable = false)
     private final long authorId;
+    @Column(name = "miniature_name", nullable = false)
     private final String miniatureName;
+    @Column(name = "rating", nullable = false)
     private final float rating;
 
 

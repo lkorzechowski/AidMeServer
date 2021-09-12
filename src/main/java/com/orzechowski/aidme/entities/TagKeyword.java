@@ -1,9 +1,19 @@
 package com.orzechowski.aidme.entities;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "tag_keywords")
 public class TagKeyword
 {
+    @Id
     private long tagKeywordId;
+    @Column(name = "keyword_id", nullable = false)
     private final long keywordId;
+    @Column(name = "tag_id", nullable = false)
     private final long tagId;
 
     public TagKeyword(long keywordId, long tagId)

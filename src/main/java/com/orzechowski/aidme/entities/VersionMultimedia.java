@@ -1,9 +1,19 @@
 package com.orzechowski.aidme.entities;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "version_multimedia")
 public class VersionMultimedia
 {
+    @Id
     private long versionMultimediaId;
+    @Column(name = "multimedia_id", nullable = false)
     private final long multimediaId;
+    @Column(name = "version_id", nullable = false)
     private final long versionId;
 
     public VersionMultimedia(long multimediaId, long versionId)

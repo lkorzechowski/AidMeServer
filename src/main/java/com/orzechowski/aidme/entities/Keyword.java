@@ -1,8 +1,17 @@
 package com.orzechowski.aidme.entities;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "keywords")
 public class Keyword
 {
+    @Id
     private long keywordId;
+    @Column(name = "word", nullable = false)
     private final String word;
 
     public Keyword(String word)
