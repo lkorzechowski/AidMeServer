@@ -28,4 +28,19 @@ public class TagKeyword
         this.keywordId = keywordId;
         this.tagId = tagId;
     }
+
+    public long getTagKeywordId()
+    {
+        return tagKeywordId;
+    }
+
+    public long getKeywordId()
+    {
+        return keywordId;
+    }
+
+    public long getTagId()
+    {
+        return tagId;
+    }
 }

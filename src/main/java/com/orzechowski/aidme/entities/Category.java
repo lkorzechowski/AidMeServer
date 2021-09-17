@@ -37,4 +37,29 @@ public class Category
         this.miniatureName = miniatureName;
         this.categoryLevel = categoryLevel;
     }
+
+    public long getCategoryId()
+    {
+        return categoryId;
+    }
+
+    public String getCategoryName()
+    {
+        return categoryName;
+    }
+
+    public boolean isHasSubcategories()
+    {
+        return hasSubcategories;
+    }
+
+    public String getMiniatureName()
+    {
+        return miniatureName;
+    }
+
+    public int getCategoryLevel()
+    {
+        return categoryLevel;
+    }
 }

@@ -66,4 +66,39 @@ public class Version
         this.hasParent = hasParent;
         this.parentVersionId = parentVersionId;
     }
+
+    public long getVersionId()
+    {
+        return versionId;
+    }
+
+    public String getText()
+    {
+        return text;
+    }
+
+    public long getTutorialId()
+    {
+        return tutorialId;
+    }
+
+    public boolean isDelayGlobalSound()
+    {
+        return delayGlobalSound;
+    }
+
+    public boolean isHasChildren()
+    {
+        return hasChildren;
+    }
+
+    public boolean isHasParent()
+    {
+        return hasParent;
+    }
+
+    public long getParentVersionId()
+    {
+        return parentVersionId;
+    }
 }

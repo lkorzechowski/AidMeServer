@@ -28,4 +28,19 @@ public class TutorialTag
         this.tutorialId = tutorialId;
         this.tagId = tagId;
     }
+
+    public long getTutorialTagId()
+    {
+        return tutorialTagId;
+    }
+
+    public long getTutorialId()
+    {
+        return tutorialId;
+    }
+
+    public long getTagId()
+    {
+        return tagId;
+    }
 }

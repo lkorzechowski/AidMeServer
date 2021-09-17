@@ -41,4 +41,34 @@ public class TutorialSound
         this.tutorialId = tutorialId;
         this.fileName = fileName;
     }
+
+    public long getSoundId()
+    {
+        return soundId;
+    }
+
+    public long getSoundStart()
+    {
+        return soundStart;
+    }
+
+    public boolean isSoundLoop()
+    {
+        return soundLoop;
+    }
+
+    public long getInterval()
+    {
+        return interval;
+    }
+
+    public long getTutorialId()
+    {
+        return tutorialId;
+    }
+
+    public String getFileName()
+    {
+        return fileName;
+    }
 }

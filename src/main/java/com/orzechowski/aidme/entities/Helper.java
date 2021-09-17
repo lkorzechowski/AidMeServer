@@ -66,4 +66,29 @@ public class Helper
         if(odd.length()<4) this.title = odd;
         else this.profession = odd;
     }
+
+    public long getHelperId()
+    {
+        return helperId;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public String getSurname()
+    {
+        return surname;
+    }
+
+    public String getTitle()
+    {
+        return title;
+    }
+
+    public String getProfession()
+    {
+        return profession;
+    }
 }

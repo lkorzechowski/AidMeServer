@@ -28,4 +28,19 @@ public class VersionInstruction
         this.versionId = versionId;
         this.instructionPosition = instructionPosition;
     }
+
+    public long getVersionInstructionId()
+    {
+        return versionInstructionId;
+    }
+
+    public long getVersionId()
+    {
+        return versionId;
+    }
+
+    public int getInstructionPosition()
+    {
+        return instructionPosition;
+    }
 }

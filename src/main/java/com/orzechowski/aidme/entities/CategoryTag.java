@@ -28,4 +28,19 @@ public class CategoryTag
         this.categoryId = categoryId;
         this.tagId = tagId;
     }
+
+    public long getCategoryTagId()
+    {
+        return categoryTagId;
+    }
+
+    public long getCategoryId()
+    {
+        return categoryId;
+    }
+
+    public long getTagId()
+    {
+        return tagId;
+    }
 }

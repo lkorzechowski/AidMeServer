@@ -24,4 +24,14 @@ public class BlockedUser
         this.blockedUserId = blockedUserId;
         this.phoneNumber = phoneNumber;
     }
+
+    public long getBlockedUserId()
+    {
+        return blockedUserId;
+    }
+
+    public String getPhoneNumber()
+    {
+        return phoneNumber;
+    }
 }

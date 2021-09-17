@@ -32,4 +32,24 @@ public class TutorialLink
         this.originId = originId;
         this.instructionNumber = instructionNumber;
     }
+
+    public long getTutorialLinkId()
+    {
+        return tutorialLinkId;
+    }
+
+    public long getTutorialId()
+    {
+        return tutorialId;
+    }
+
+    public long getOriginId()
+    {
+        return originId;
+    }
+
+    public int getInstructionNumber()
+    {
+        return instructionNumber;
+    }
 }

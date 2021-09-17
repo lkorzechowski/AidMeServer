@@ -28,4 +28,19 @@ public class VersionSound
         this.tutorialSoundId = tutorialSoundId;
         this.versionId = versionId;
     }
+
+    public long getVersionSoundId()
+    {
+        return versionSoundId;
+    }
+
+    public long getTutorialSoundId()
+    {
+        return tutorialSoundId;
+    }
+
+    public long getVersionId()
+    {
+        return versionId;
+    }
 }

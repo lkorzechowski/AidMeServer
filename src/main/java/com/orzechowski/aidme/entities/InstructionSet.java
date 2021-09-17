@@ -66,4 +66,39 @@ public class InstructionSet
         this.position = position;
         this.narrationName = narrationName;
     }
+
+    public long getInstructionSetId()
+    {
+        return instructionSetId;
+    }
+
+    public String getTitle()
+    {
+        return title;
+    }
+
+    public String getInstructions()
+    {
+        return instructions;
+    }
+
+    public int getTime()
+    {
+        return time;
+    }
+
+    public long getTutorialId()
+    {
+        return tutorialId;
+    }
+
+    public int getPosition()
+    {
+        return position;
+    }
+
+    public String getNarrationName()
+    {
+        return narrationName;
+    }
 }

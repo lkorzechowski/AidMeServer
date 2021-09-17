@@ -28,4 +28,19 @@ public class VersionMultimedia
         this.multimediaId = multimediaId;
         this.versionId = versionId;
     }
+
+    public long getVersionMultimediaId()
+    {
+        return versionMultimediaId;
+    }
+
+    public long getMultimediaId()
+    {
+        return multimediaId;
+    }
+
+    public long getVersionId()
+    {
+        return versionId;
+    }
 }

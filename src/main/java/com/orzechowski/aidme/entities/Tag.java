@@ -28,4 +28,19 @@ public class Tag
         this.tagName = tagName;
         this.tagLevel = tagLevel;
     }
+
+    public long getTagId()
+    {
+        return tagId;
+    }
+
+    public String getTagName()
+    {
+        return tagName;
+    }
+
+    public int getTagLevel()
+    {
+        return tagLevel;
+    }
 }

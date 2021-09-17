@@ -37,4 +37,29 @@ public class Tutorial
         this.miniatureName = miniatureName;
         this.rating = rating;
     }
+
+    public long getTutorialId()
+    {
+        return tutorialId;
+    }
+
+    public String getTutorialName()
+    {
+        return tutorialName;
+    }
+
+    public long getAuthorId()
+    {
+        return authorId;
+    }
+
+    public String getMiniatureName()
+    {
+        return miniatureName;
+    }
+
+    public float getRating()
+    {
+        return rating;
+    }
 }

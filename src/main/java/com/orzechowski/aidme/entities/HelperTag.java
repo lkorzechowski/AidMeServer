@@ -28,4 +28,19 @@ public class HelperTag
         this.helperId = helperId;
         this.tagId = tagId;
     }
+
+    public long getHelperTagId()
+    {
+        return helperTagId;
+    }
+
+    public long getHelperId()
+    {
+        return helperId;
+    }
+
+    public long getTagId()
+    {
+        return tagId;
+    }
 }

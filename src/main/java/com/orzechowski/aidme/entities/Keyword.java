@@ -24,4 +24,14 @@ public class Keyword
         this.keywordId = keywordId;
         this.word = word;
     }
+
+    public long getKeywordId()
+    {
+        return keywordId;
+    }
+
+    public String getWord()
+    {
+        return word;
+    }
 }

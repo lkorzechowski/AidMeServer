@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "multimedias")
+@Table(name = "multimedia")
 public class Multimedia
 {
     @Id
@@ -44,5 +44,40 @@ public class Multimedia
         this.fileName = fileName;
         this.loop = loop;
         this.position = position;
+    }
+
+    public long getMultimediaId()
+    {
+        return multimediaId;
+    }
+
+    public long getTutorialId()
+    {
+        return tutorialId;
+    }
+
+    public int getDisplayTime()
+    {
+        return displayTime;
+    }
+
+    public boolean isType()
+    {
+        return type;
+    }
+
+    public String getFileName()
+    {
+        return fileName;
+    }
+
+    public boolean isLoop()
+    {
+        return loop;
+    }
+
+    public int getPosition()
+    {
+        return position;
     }
 }
