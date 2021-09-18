@@ -2,11 +2,19 @@ package com.orzechowski.aidme;
 
 import com.orzechowski.aidme.entities.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +25,7 @@ public class RestController
     private final static String url = "jdbc:postgresql://localhost:5432/AidMe";
     private final static String user = "spring";
     private final static String password = "malina1213141516171819";
+    private final static String pathBase = "C:\\server_files\\";
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -261,8 +270,8 @@ public class RestController
                     connection.prepareStatement("SELECT * FROM version_instructions WHERE version_id = " + id);
             ResultSet rs = preparedStatement.executeQuery();
             while(rs.next()) {
-                versionInstructions.add(new VersionInstruction(rs.getInt("version_instruction_id"),
-                        rs.getInt("version_id"), rs.getInt("instruction_position")));
+                versionInstructions.add(new VersionInstruction(rs.getInt("version_instruction_id"), id,
+                        rs.getInt("instruction_position")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -289,18 +298,18 @@ public class RestController
         return ResponseEntity.ok(versionMultimedia);
     }
 
-    @GetMapping("/versionsounds/{id}")
+    @GetMapping("/versionsound/{id}")
     public ResponseEntity<List<VersionSound>> versionSounds(@PathVariable long id)
     {
         List<VersionSound> versionSounds = new LinkedList<>();
         try {
             Connection connection = DriverManager.getConnection(url, user, password);
             PreparedStatement preparedStatement =
-                    connection.prepareStatement("SELECT * FROM version_sounds WHERE version_id = " + id);
+                    connection.prepareStatement("SELECT * FROM version_sound WHERE version_id = " + id);
             ResultSet rs = preparedStatement.executeQuery();
             while(rs.next()) {
-                versionSounds.add(new VersionSound(rs.getInt("version_sound_id"),
-                        rs.getInt("version_id"), rs.getInt("sound_id")));
+                versionSounds.add(new VersionSound(rs.getInt("version_sound_id"), id,
+                        rs.getInt("sound_id")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -347,23 +356,104 @@ public class RestController
         return null;
     }
 
-    @GetMapping("/tutoriallinks/{id}")
+    @GetMapping("/tutoriallink/{id}")
     public ResponseEntity<List<TutorialLink>> tutoriallinks(@PathVariable long id)
     {
         List<TutorialLink> tutorialLinks = new LinkedList<>();
         try {
             Connection connection = DriverManager.getConnection(url, user, password);
             PreparedStatement preparedStatement =
-                    connection.prepareStatement("SELECT * FROM tutorial_links WHERE tutorial_id = " + id);
+                    connection.prepareStatement("SELECT * FROM tutorial_links WHERE origin_id = " + id);
             ResultSet rs = preparedStatement.executeQuery();
             while(rs.next()) {
                 tutorialLinks.add(new TutorialLink(rs.getInt("tutorial_link_id"),
-                        rs.getInt("tutorial_id"), rs.getInt("origin_id"),
-                        rs.getInt("instruction_number")));
+                        rs.getInt("tutorial_id"), id, rs.getInt("instruction_number")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return ResponseEntity.ok(tutorialLinks);
+    }
+
+    @GetMapping("/files/images/{filename}")
+    public ResponseEntity<Resource> image(@PathVariable String filename)
+    {
+        File file = new File(pathBase + "images\\" + filename);
+        HttpHeaders header = makeHeader(filename);
+        ByteArrayResource resource = null;
+        try {
+            resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok()
+                .headers(header)
+                .contentLength(file.length())
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(resource);
+    }
+
+    @GetMapping("/files/vids/{filename}")
+    public ResponseEntity<Resource> vid(@PathVariable String filename)
+    {
+        File file = new File(pathBase + "vids\\" + filename);
+        HttpHeaders header = makeHeader(filename);
+        ByteArrayResource resource = null;
+        try {
+            resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok()
+                .headers(header)
+                .contentLength(file.length())
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(resource);
+    }
+
+    @GetMapping("files/sounds/{filename}")
+    public ResponseEntity<Resource> sound(@PathVariable String filename)
+    {
+        File file = new File(pathBase + "sounds\\" + filename);
+        HttpHeaders header = makeHeader(filename);
+        ByteArrayResource resource = null;
+        try {
+            resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok()
+                .headers(header)
+                .contentLength(file.length())
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(resource);
+    }
+
+    @GetMapping("files/narrations/{filename}")
+    public ResponseEntity<Resource> narration(@PathVariable String filename)
+    {
+        File file = new File(pathBase + "narrations\\" + filename);
+        HttpHeaders header = makeHeader(filename);
+        ByteArrayResource resource = null;
+        try {
+            resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok()
+                .headers(header)
+                .contentLength(file.length())
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(resource);
+    }
+
+    private HttpHeaders makeHeader(String filename)
+    {
+        HttpHeaders header = new HttpHeaders();
+        header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+filename);
+        header.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        header.add("Pragma", "no-cache");
+        header.add("Expires", "0");
+        return header;
     }
 }
