@@ -1,13 +1,11 @@
 package com.orzechowski.aidme;
 
 import com.orzechowski.aidme.entities.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -26,9 +24,6 @@ public class RestController
     private final static String user = "spring";
     private final static String password = "malina1213141516171819";
     private final static String pathBase = "C:\\server_files\\";
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @GetMapping("/")
     public String home()
