@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +25,7 @@ public class RestController
     private final static String user = "spring";
     private final static String password = "malina1213141516171819";
     private final static String pathBase = "C:\\server_files\\";
+    private final List<Helper> occupiedHelpers = new LinkedList<>();
 
     @GetMapping("/")
     public String home()
@@ -31,13 +33,14 @@ public class RestController
         return "";
     }
 
-    @GetMapping("/helpers")
-    public ResponseEntity<List<Helper>> helpers()
+    @GetMapping("/helperlist")
+    public ResponseEntity<List<Helper>> helperlist()
     {
         List<Helper> helpers = new LinkedList<>();
         try {
             Connection connection = DriverManager.getConnection(url, user, password);
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM helpers");
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT helper_id, helper_name, " +
+                    "helper_surname, helper_title, helper_profession FROM helpers");
             ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
                 helpers.add(new Helper(rs.getInt("helper_id"), rs.getString("helper_name"),
@@ -49,6 +52,37 @@ public class RestController
         }
         return ResponseEntity.ok(helpers);
     }
+
+    @PostMapping("/number/{id}")
+    public ResponseEntity<Helper> helperNumber(@PathVariable long id)
+    {
+        try {
+            Connection connection = DriverManager.getConnection(url, user, password);
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement("SELECT h.* FROM helpers h " +
+                            "JOIN helper_tags ht ON h.helper_id = ht.helper_id " +
+                            "JOIN tags t ON ht.tag_id = t.tag_id WHERE t.tag_id = " + id);
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()) {
+                Helper helper = new Helper(rs.getInt("helper_id"), rs.getString("helper_name"),
+                        rs.getString("helper_surname"), rs.getString("helper_title"),
+                        rs.getString("helper_profession"), rs.getInt("phone"));
+                if(!occupiedHelpers.contains(helper)) {
+                    occupiedHelpers.add(helper);
+                    return ResponseEntity.ok(helper);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //SELECT p.*
+    //FROM posts p
+    //JOIN posttags pt ON p.id = pt.post_id
+    //JOIN tags t ON pt.tag_id = t.id
+    //WHERE t.name = 'sql'
 
     @GetMapping("/tutorials")
     public ResponseEntity<List<Tutorial>> tutorials()
@@ -220,7 +254,7 @@ public class RestController
         try {
             Connection connection = DriverManager.getConnection(url, user, password);
             PreparedStatement preparedStatement =
-                    connection.prepareStatement("SELECT * FROM instruction_sets WHERE tutorial_id = "+ id);
+                    connection.prepareStatement("SELECT * FROM instruction_sets WHERE tutorial_id = " + id);
             ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
                 instructionSets.add(new InstructionSet(rs.getInt("instruction_set_id"),
@@ -406,7 +440,7 @@ public class RestController
                 .body(resource);
     }
 
-    @GetMapping("files/sounds/{filename}")
+    @GetMapping("/files/sounds/{filename}")
     public ResponseEntity<Resource> sound(@PathVariable String filename)
     {
         File file = new File(pathBase + "sounds\\" + filename);
@@ -424,7 +458,7 @@ public class RestController
                 .body(resource);
     }
 
-    @GetMapping("files/narrations/{filename}")
+    @GetMapping("/files/narrations/{filename}")
     public ResponseEntity<Resource> narration(@PathVariable String filename)
     {
         File file = new File(pathBase + "narrations\\" + filename);

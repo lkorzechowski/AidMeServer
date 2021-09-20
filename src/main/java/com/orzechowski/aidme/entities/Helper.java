@@ -19,13 +19,19 @@ public class Helper
     private String title;
     @Column(name = "helper_profession")
     private String profession;
+    @Column(name = "email")
+    private String email;
+    @Column(name = "phone")
+    private Integer phone;
 
-    public Helper(String name, String surname, String title, String profession)
+    public Helper(long helperId, String name, String surname, String title, String profession, Integer phone)
     {
+        this.helperId = helperId;
         this.name = name;
         this.surname = surname;
         this.title = title;
         this.profession = profession;
+        this.phone = phone;
     }
 
     public Helper(long helperId, String name, String surname, String title, String profession)
@@ -35,36 +41,6 @@ public class Helper
         this.surname = surname;
         this.title = title;
         this.profession = profession;
-    }
-
-    public Helper(String name, String surname)
-    {
-        this.name = name;
-        this.surname = surname;
-    }
-
-    public Helper(long helperId, String name, String surname)
-    {
-        this.helperId = helperId;
-        this.name = name;
-        this.surname = surname;
-    }
-
-    public Helper(String name, String surname, String odd)
-    {
-        this.name = name;
-        this.surname = surname;
-        if(odd.length()<4) this.title = odd;
-        else this.profession = odd;
-    }
-
-    public Helper(long helperId, String name, String surname, String odd)
-    {
-        this.helperId = helperId;
-        this.name = name;
-        this.surname = surname;
-        if(odd.length()<4) this.title = odd;
-        else this.profession = odd;
     }
 
     public long getHelperId()
@@ -90,5 +66,10 @@ public class Helper
     public String getProfession()
     {
         return profession;
+    }
+
+    public Integer getPhone()
+    {
+        return phone;
     }
 }
