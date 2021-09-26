@@ -6,9 +6,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +25,49 @@ public class RestController
     private final static String pathBase = "C:\\server_files\\";
     private final List<Helper> occupiedHelpers = new LinkedList<>();
 
+    @PostMapping("/login")
+    public ResponseEntity<List<Boolean>> login(@RequestParam String email)
+    {
+        List<Boolean> status = new LinkedList<>();
+        try {
+            Connection connection = DriverManager.getConnection(url, user, password);
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT helping, verified " +
+                    "WHERE email = " + email);
+            ResultSet rs = preparedStatement.executeQuery();
+            if(rs.next()) {
+                status.add(true); //exists?
+                status.add(rs.getBoolean("helping"));
+                status.add(rs.getBoolean("verified"));
+            } else {
+                status.add(false); //exists?
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok(status);
+    }
+
+    @PutMapping("/setFullHelperDetail")
+    public ResponseEntity<Boolean> uploadDetail(@RequestBody ServerSideHelper helper)
+    {
+        try {
+            Connection connection = DriverManager.getConnection(url, user, password);
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO helpers VALUES " +
+                    "default, '"
+                    + helper.getName() + "', '"
+                    + helper.getSurname() + "', '"
+                    + helper.getTitle() + "', '"
+                    + helper.getProfession() + "', '"
+                    + helper.getEmail() + "', "
+                    + helper.getPhone() + ", 'false', 'false'");
+            preparedStatement.executeQuery();
+            return ResponseEntity.ok(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return ResponseEntity.ok(false);
+        }
+    }
+
     @GetMapping("/")
     public String home()
     {
@@ -42,7 +83,7 @@ public class RestController
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT helper_id, helper_name, " +
                     "helper_surname, helper_title, helper_profession FROM helpers");
             ResultSet rs = preparedStatement.executeQuery();
-            while (rs.next()) {
+            while(rs.next()) {
                 helpers.add(new Helper(rs.getInt("helper_id"), rs.getString("helper_name"),
                         rs.getString("helper_surname"), rs.getString("helper_title"),
                         rs.getString("helper_profession")));
@@ -52,8 +93,8 @@ public class RestController
         }
         return ResponseEntity.ok(helpers);
     }
-
-    @PostMapping("/number/{id}")
+/*
+    @GetMapping("/number/{id}")
     public ResponseEntity<Helper> helperNumber(@PathVariable long id)
     {
         try {
@@ -77,13 +118,7 @@ public class RestController
         }
         return null;
     }
-
-    //SELECT p.*
-    //FROM posts p
-    //JOIN posttags pt ON p.id = pt.post_id
-    //JOIN tags t ON pt.tag_id = t.id
-    //WHERE t.name = 'sql'
-
+*/
     @GetMapping("/tutorials")
     public ResponseEntity<List<Tutorial>> tutorials()
     {

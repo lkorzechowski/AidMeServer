@@ -1,16 +1,12 @@
 package com.orzechowski.aidme.entities;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
-@Entity
-@Table(name = "helpers")
-public class Helper
+public class ServerSideHelper
 {
     @Id
-    private final long helperId;
+    private long helperId;
     @Column(name = "helper_name", nullable = false)
     private final String name;
     @Column(name = "helper_surname", nullable = false)
@@ -19,23 +15,19 @@ public class Helper
     private final String title;
     @Column(name = "helper_profession")
     private final String profession;
+    @Column(name = "email")
+    private final String email;
+    @Column(name = "phone")
+    private final int phone;
 
-    public Helper(long helperId, String name, String surname, String title, String profession, Integer phone)
+    public ServerSideHelper(String name, String surname, String title, String profession, String email, int phone)
     {
-        this.helperId = helperId;
         this.name = name;
         this.surname = surname;
         this.title = title;
         this.profession = profession;
-    }
-
-    public Helper(long helperId, String name, String surname, String title, String profession)
-    {
-        this.helperId = helperId;
-        this.name = name;
-        this.surname = surname;
-        this.title = title;
-        this.profession = profession;
+        this.email = email;
+        this.phone = phone;
     }
 
     public long getHelperId()
@@ -61,5 +53,15 @@ public class Helper
     public String getProfession()
     {
         return profession;
+    }
+
+    public String getEmail()
+    {
+        return email;
+    }
+
+    public int getPhone()
+    {
+        return phone;
     }
 }
