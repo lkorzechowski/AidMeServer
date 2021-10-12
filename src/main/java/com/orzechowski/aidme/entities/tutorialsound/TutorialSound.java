@@ -1,4 +1,4 @@
-package com.orzechowski.aidme.entities;
+package com.orzechowski.aidme.entities.tutorialsound;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,17 +12,17 @@ public class TutorialSound
     @Id
     private long soundId;
     @Column(name = "sound_start", nullable = false)
-    private final long soundStart;
+    private final int soundStart;
     @Column(name = "sound_loop", nullable = false)
     private final boolean soundLoop;
     @Column(name = "interval", nullable = false)
-    private final long interval;
+    private final int interval;
     @Column(name = "tutorial_id", nullable = false)
     private final long tutorialId;
     @Column(name = "file_name", nullable = false)
     private final String fileName;
 
-    public TutorialSound(long soundStart, boolean soundLoop, long interval, long tutorialId, String fileName)
+    public TutorialSound(int soundStart, boolean soundLoop, int interval, long tutorialId, String fileName)
     {
         this.soundStart = soundStart;
         this.soundLoop = soundLoop;
@@ -31,7 +31,7 @@ public class TutorialSound
         this.fileName = fileName;
     }
 
-    public TutorialSound(long soundId, long soundStart, boolean soundLoop, long interval, long tutorialId,
+    public TutorialSound(long soundId, int soundStart, boolean soundLoop, int interval, long tutorialId,
                          String fileName)
     {
         this.soundId = soundId;

@@ -1,4 +1,4 @@
-package com.orzechowski.aidme.entities;
+package com.orzechowski.aidme.entities.document;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,16 +16,16 @@ public class Document
     @Column(name = "description")
     private String description;
     @Column(name = "helper_id", nullable = false)
-    private final int helperId;
+    private final long helperId;
 
-    public Document(String fileName, String description, int helperId)
+    public Document(String fileName, String description, long helperId)
     {
         this.fileName = fileName;
         this.description = description;
         this.helperId = helperId;
     }
 
-    public Document(long documentId, String fileName, String description, int helperId)
+    public Document(long documentId, String fileName, String description, long helperId)
     {
         this.documentId = documentId;
         this.fileName = fileName;
@@ -39,7 +39,7 @@ public class Document
         this.helperId = helperId;
     }
 
-    public Document(long documentId, String fileName, int helperId)
+    public Document(long documentId, String fileName, long helperId)
     {
         this.documentId = documentId;
         this.fileName = fileName;

@@ -1,6 +1,19 @@
 package com.orzechowski.aidme;
 
 import com.orzechowski.aidme.entities.*;
+import com.orzechowski.aidme.entities.blockeduser.BlockedUser;
+import com.orzechowski.aidme.entities.category.Category;
+import com.orzechowski.aidme.entities.categorytag.CategoryTag;
+import com.orzechowski.aidme.entities.helper.Helper;
+import com.orzechowski.aidme.entities.helpertag.HelperTag;
+import com.orzechowski.aidme.entities.instructionset.InstructionSet;
+import com.orzechowski.aidme.entities.keyword.Keyword;
+import com.orzechowski.aidme.entities.multimedia.Multimedia;
+import com.orzechowski.aidme.entities.tag.Tag;
+import com.orzechowski.aidme.entities.tagkeyword.TagKeyword;
+import com.orzechowski.aidme.entities.tutorial.Tutorial;
+import com.orzechowski.aidme.entities.tutoriallink.TutorialLink;
+import com.orzechowski.aidme.entities.tutorialsound.TutorialSound;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
