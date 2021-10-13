@@ -15,7 +15,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     {
         try {
             security.formLogin().disable();
-            //security.requiresChannel().anyRequest().requiresSecure();
             security.headers().contentTypeOptions()
                     .and().xssProtection()
                     .and().cacheControl()

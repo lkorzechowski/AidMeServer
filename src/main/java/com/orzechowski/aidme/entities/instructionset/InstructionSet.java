@@ -19,7 +19,7 @@ public class InstructionSet
     private final int time;
     @Column(name = "tutorial_id", nullable = false)
     private final long tutorialId;
-    @Column(name = "position", nullable = false)
+    @Column(name = "instruction_position", nullable = false)
     private final int position;
     @Column(name = "narration_name")
     private String narrationName;

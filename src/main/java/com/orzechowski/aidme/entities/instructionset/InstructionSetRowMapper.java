@@ -12,7 +12,7 @@ public class InstructionSetRowMapper implements RowMapper<InstructionSet>
     {
         return new InstructionSet(rs.getLong("instruction_set_id"), rs.getString("title"),
                 rs.getString("instructions"), rs.getInt("time"),
-                rs.getLong("tutorial_id"), rs.getInt("position"),
+                rs.getLong("tutorial_id"), rs.getInt("set_position"),
                 rs.getString("narration_name"));
     }
 }

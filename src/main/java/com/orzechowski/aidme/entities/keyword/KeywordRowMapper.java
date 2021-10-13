@@ -10,6 +10,6 @@ public class KeywordRowMapper implements RowMapper<Keyword>
     @Override
     public Keyword mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new Keyword(rs.getLong(0), rs.getString(1));
+        return new Keyword(rs.getLong(1), rs.getString(2));
     }
 }

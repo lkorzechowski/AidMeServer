@@ -1,4 +1,4 @@
-package com.orzechowski.aidme.entities;
+package com.orzechowski.aidme.entities.version;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

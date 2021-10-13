@@ -2,19 +2,43 @@ package com.orzechowski.aidme;
 
 import com.orzechowski.aidme.entities.*;
 import com.orzechowski.aidme.entities.blockeduser.BlockedUser;
+import com.orzechowski.aidme.entities.blockeduser.BlockedUserRowMapper;
 import com.orzechowski.aidme.entities.category.Category;
+import com.orzechowski.aidme.entities.category.CategoryRowMapper;
 import com.orzechowski.aidme.entities.categorytag.CategoryTag;
+import com.orzechowski.aidme.entities.categorytag.CategoryTagRowMapper;
 import com.orzechowski.aidme.entities.helper.Helper;
+import com.orzechowski.aidme.entities.helper.HelperRowMapper;
 import com.orzechowski.aidme.entities.helpertag.HelperTag;
+import com.orzechowski.aidme.entities.helpertag.HelperTagRowMapper;
 import com.orzechowski.aidme.entities.instructionset.InstructionSet;
+import com.orzechowski.aidme.entities.instructionset.InstructionSetRowMapper;
 import com.orzechowski.aidme.entities.keyword.Keyword;
+import com.orzechowski.aidme.entities.keyword.KeywordRowMapper;
 import com.orzechowski.aidme.entities.multimedia.Multimedia;
+import com.orzechowski.aidme.entities.multimedia.MultimediaRowMapper;
 import com.orzechowski.aidme.entities.tag.Tag;
+import com.orzechowski.aidme.entities.tag.TagRowMapper;
 import com.orzechowski.aidme.entities.tagkeyword.TagKeyword;
+import com.orzechowski.aidme.entities.tagkeyword.TagKeywordRowMapper;
 import com.orzechowski.aidme.entities.tutorial.Tutorial;
+import com.orzechowski.aidme.entities.tutorial.TutorialRowMapper;
 import com.orzechowski.aidme.entities.tutoriallink.TutorialLink;
+import com.orzechowski.aidme.entities.tutoriallink.TutorialLinkRowMapper;
 import com.orzechowski.aidme.entities.tutorialsound.TutorialSound;
-import org.springframework.core.io.ByteArrayResource;
+import com.orzechowski.aidme.entities.tutorialsound.TutorialSoundRowMapper;
+import com.orzechowski.aidme.entities.tutorialtag.TutorialTag;
+import com.orzechowski.aidme.entities.tutorialtag.TutorialTagRowMapper;
+import com.orzechowski.aidme.entities.version.Version;
+import com.orzechowski.aidme.entities.version.VersionRowMapper;
+import com.orzechowski.aidme.entities.versioninstruction.VersionInstruction;
+import com.orzechowski.aidme.entities.versioninstruction.VersionInstructionRowMapper;
+import com.orzechowski.aidme.entities.versionmultimedia.VersionMultimedia;
+import com.orzechowski.aidme.entities.versionmultimedia.VersionMultimediaRowMapper;
+import com.orzechowski.aidme.entities.versionsound.VersionSound;
+import com.orzechowski.aidme.entities.versionsound.VersionSoundRowMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
@@ -23,10 +47,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -35,13 +56,16 @@ import java.util.stream.Collectors;
 @RestController
 public class UrlRestController
 {
+    @Autowired
     private final JdbcTemplate jdbcTemplate;
+    private final ApplicationContext context;
     private final static String pathBase = "gs://aidme/";
     private final List<Helper> occupiedHelpers = new LinkedList<>();
 
-    public UrlRestController(JdbcTemplate jdbcTemplate)
+    public UrlRestController(JdbcTemplate jdbcTemplate, ApplicationContext context)
     {
         this.jdbcTemplate = jdbcTemplate;
+        this.context = context;
     }
 
     @PostMapping("/login")
@@ -78,8 +102,8 @@ public class UrlRestController
     public ResponseEntity<List<Helper>> helperlist()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForList("SELECT helper_id, helper_name, " +
-                    "helper_surname, helper_title, helper_profession FROM helpers", Helper.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT helper_id, helper_name, " +
+                    "helper_surname, helper_title, helper_profession FROM helpers", new HelperRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -115,7 +139,7 @@ public class UrlRestController
     public ResponseEntity<List<Tutorial>> tutorials()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForList("SELECT * FROM tutorials", Tutorial.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorials", new TutorialRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -126,7 +150,7 @@ public class UrlRestController
     public ResponseEntity<List<Category>> categories()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForList("SELECT * FROM categories", Category.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM categories", new CategoryRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -137,7 +161,7 @@ public class UrlRestController
     public ResponseEntity<List<Tag>> tags()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForList("SELECT * FROM tags", Tag.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tags", new TagRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -148,7 +172,7 @@ public class UrlRestController
     public ResponseEntity<List<Keyword>> keywords()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForList("SELECT * FROM keywords", Keyword.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM keywords", new KeywordRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -159,7 +183,7 @@ public class UrlRestController
     public ResponseEntity<List<TagKeyword>> tagKeywords()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForList("SELECT * FROM tag_keywords", TagKeyword.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tag_keywords", new TagKeywordRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -170,7 +194,7 @@ public class UrlRestController
     public ResponseEntity<List<BlockedUser>> blockedUsers()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForList("SELECT * FROM blocked_users", BlockedUser.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM blocked_users", new BlockedUserRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -181,7 +205,7 @@ public class UrlRestController
     public ResponseEntity<List<CategoryTag>> categoryTags()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForList("SELECT * FROM category_tags", CategoryTag.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM category_tags", new CategoryTagRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -192,7 +216,7 @@ public class UrlRestController
     public ResponseEntity<List<HelperTag>> helperTags()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForList("SELECT * FROM helper_tags", HelperTag.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM helper_tags", new HelperTagRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -203,7 +227,7 @@ public class UrlRestController
     public ResponseEntity<List<TutorialTag>> tutorialTags()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForList("SELECT * FROM tutorial_tags", TutorialTag.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_tags", new TutorialTagRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -214,9 +238,8 @@ public class UrlRestController
     public ResponseEntity<List<InstructionSet>> tutorialInstructions(@PathVariable long id)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate
-                    .queryForList("SELECT * FROM instruction_sets WHERE tutorial_id = " + id,
-                            InstructionSet.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM instruction_sets WHERE tutorial_id = " + id,
+                    new InstructionSetRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -227,8 +250,8 @@ public class UrlRestController
     public ResponseEntity<List<Version>> tutorialVersions(@PathVariable long id)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForList("SELECT * FROM versions WHERE tutorial_id = " + id,
-                    Version.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM versions WHERE tutorial_id = " + id,
+                    new VersionRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -239,9 +262,8 @@ public class UrlRestController
     public ResponseEntity<List<VersionInstruction>> versionInstructions(@PathVariable long id)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate
-                    .queryForList("SELECT * FROM version_instructions WHERE version_id = " + id,
-                            VersionInstruction.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version_instructions WHERE version_id = "
+                            + id, new VersionInstructionRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -252,9 +274,8 @@ public class UrlRestController
     public ResponseEntity<List<VersionMultimedia>> versionMultimedia(@PathVariable long id)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate
-                    .queryForList("SELECT * FROM version_multimedia WHERE version_id = " + id,
-                            VersionMultimedia.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version_multimedia WHERE version_id = " + id,
+                    new VersionMultimediaRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -265,9 +286,8 @@ public class UrlRestController
     public ResponseEntity<List<VersionSound>> versionSounds(@PathVariable long id)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate
-                    .queryForList("SELECT * FROM version_sound WHERE version_id = " + id,
-                            VersionSound.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version_sound WHERE version_id = " + id,
+                    new VersionSoundRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -278,9 +298,8 @@ public class UrlRestController
     public ResponseEntity<Multimedia> multimedia(@PathVariable long id)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate
-                    .queryForObject("SELECT * FROM multimedia WHERE multimedia_id = " + id,
-                            Multimedia.class));
+            return ResponseEntity.ok(jdbcTemplate.queryForObject("SELECT * FROM multimedia WHERE multimedia_id = "
+                            + id, new MultimediaRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -291,9 +310,8 @@ public class UrlRestController
     public ResponseEntity<TutorialSound> sounds(@PathVariable long id)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate
-                    .queryForObject("SELECT * FROM tutorial_sounds WHERE sound_id = " + id,
-                            TutorialSound.class));
+            return ResponseEntity.ok(jdbcTemplate.queryForObject("SELECT * FROM tutorial_sounds WHERE sound_id = "
+                            + id, new TutorialSoundRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -304,9 +322,8 @@ public class UrlRestController
     public ResponseEntity<List<TutorialLink>> tutoriallinks(@PathVariable long id)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate
-                    .queryForList("SELECT * FROM tutorial_links WHERE origin_id = " + id,
-                            TutorialLink.class));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_links WHERE origin_id = " + id,
+                    new TutorialLinkRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -316,13 +333,12 @@ public class UrlRestController
     @GetMapping("/files/images/{filename}")
     public ResponseEntity<Resource> image(@PathVariable String filename)
     {
-        File file = new File(pathBase + "images\\" + filename);
         HttpHeaders header = makeHeader(filename);
         try {
-            ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+            Resource resource = context.getResource(pathBase + "images/" + filename);
             return ResponseEntity.ok()
                     .headers(header)
-                    .contentLength(file.length())
+                    .contentLength(resource.contentLength())
                     .contentType(MediaType.parseMediaType("application/octet-stream"))
                     .body(resource);
         } catch (IOException e) {
@@ -334,13 +350,12 @@ public class UrlRestController
     @GetMapping("/files/vids/{filename}")
     public ResponseEntity<Resource> vid(@PathVariable String filename)
     {
-        File file = new File(pathBase + "vids\\" + filename);
         HttpHeaders header = makeHeader(filename);
         try {
-            ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+            Resource resource = context.getResource(pathBase + "vids/" + filename);
             return ResponseEntity.ok()
                     .headers(header)
-                    .contentLength(file.length())
+                    .contentLength(resource.contentLength())
                     .contentType(MediaType.parseMediaType("application/octet-stream"))
                     .body(resource);
         } catch (IOException e) {
@@ -352,13 +367,12 @@ public class UrlRestController
     @GetMapping("/files/sounds/{filename}")
     public ResponseEntity<Resource> sound(@PathVariable String filename)
     {
-        File file = new File(pathBase + "sounds\\" + filename);
         HttpHeaders header = makeHeader(filename);
         try {
-            ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+            Resource resource = context.getResource(pathBase + "sounds/" + filename);
             return ResponseEntity.ok()
                     .headers(header)
-                    .contentLength(file.length())
+                    .contentLength(resource.contentLength())
                     .contentType(MediaType.parseMediaType("application/octet-stream"))
                     .body(resource);
         } catch (IOException e) {
@@ -370,13 +384,12 @@ public class UrlRestController
     @GetMapping("/files/narrations/{filename}")
     public ResponseEntity<Resource> narration(@PathVariable String filename)
     {
-        File file = new File(pathBase + "narrations\\" + filename);
         HttpHeaders header = makeHeader(filename);
         try {
-            ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+            Resource resource = context.getResource(pathBase + "narrations/" + filename);
             return ResponseEntity.ok()
                     .headers(header)
-                    .contentLength(file.length())
+                    .contentLength(resource.contentLength())
                     .contentType(MediaType.parseMediaType("application/octet-stream"))
                     .body(resource);
         } catch (IOException e) {

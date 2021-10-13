@@ -10,6 +10,8 @@ public class TutorialSoundRowMapper implements RowMapper<TutorialSound>
     @Override
     public TutorialSound mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new TutorialSound(rs.getLong("sound_id"), rs.getInt("sound_start"), rs.getBoolean("soundLoop"), rs.getInt("interval"), rs.getLong("tutorial_id"), rs.getString("file_name"));
+        return new TutorialSound(rs.getLong("sound_id"), rs.getInt("sound_start"),
+                rs.getBoolean("sound_loop"), rs.getInt("interval"),
+                rs.getLong("tutorial_id"), rs.getString("file_name"));
     }
 }
