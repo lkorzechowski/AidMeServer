@@ -12,9 +12,9 @@ public class VersionMultimedia
     @Id
     private long versionMultimediaId;
     @Column(name = "multimedia_id", nullable = false)
-    private final long multimediaId;
+    private long multimediaId;
     @Column(name = "version_id", nullable = false)
-    private final long versionId;
+    private long versionId;
 
     public VersionMultimedia(long multimediaId, long versionId)
     {

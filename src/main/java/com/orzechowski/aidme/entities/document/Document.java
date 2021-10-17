@@ -12,11 +12,11 @@ public class Document
     @Id
     private long documentId;
     @Column(name = "file_name", nullable = false)
-    private final String fileName;
+    private String fileName;
     @Column(name = "description")
     private String description;
     @Column(name = "helper_id", nullable = false)
-    private final long helperId;
+    private long helperId;
 
     public Document(String fileName, String description, long helperId)
     {

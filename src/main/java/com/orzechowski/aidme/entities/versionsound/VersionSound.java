@@ -12,9 +12,9 @@ public class VersionSound
     @Id
     private long versionSoundId;
     @Column(name = "tutorial_sound_id", nullable = false)
-    private final long tutorialSoundId;
+    private long tutorialSoundId;
     @Column(name = "version_id", nullable = false)
-    private final long versionId;
+    private long versionId;
 
     public VersionSound(long tutorialSoundId, long versionId)
     {

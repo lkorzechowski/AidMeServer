@@ -1,6 +1,5 @@
 package com.orzechowski.aidme;
 
-import com.orzechowski.aidme.entities.*;
 import com.orzechowski.aidme.entities.blockeduser.BlockedUser;
 import com.orzechowski.aidme.entities.blockeduser.BlockedUserRowMapper;
 import com.orzechowski.aidme.entities.category.Category;
@@ -85,7 +84,7 @@ public class UrlRestController
     }
 
     @PutMapping("/setFullHelperDetail")
-    public ResponseEntity<Boolean> uploadDetail(@RequestBody ServerSideHelper helper)
+    public ResponseEntity<Boolean> uploadDetail(@RequestBody Helper helper)
     {
         this.jdbcTemplate.execute("INSERT INTO helpers VALUES " +
                     "default, '"
@@ -352,7 +351,7 @@ public class UrlRestController
     {
         HttpHeaders header = makeHeader(filename);
         try {
-            Resource resource = context.getResource(pathBase + "vids/" + filename);
+            Resource resource = context.getResource(pathBase + "videos/" + filename);
             return ResponseEntity.ok()
                     .headers(header)
                     .contentLength(resource.contentLength())
@@ -406,5 +405,27 @@ public class UrlRestController
         header.add("Pragma", "no-cache");
         header.add("Expires", "0");
         return header;
+    }
+
+    @PostMapping(path = "/create/tutorial", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Tutorial> insertTutorial(@PathVariable String email, @RequestBody Tutorial tutorial) {
+        if(email==null || email.isEmpty() || jdbcTemplate.query("SELECT * FROM helpers WHERE email = " + email,
+                new HelperRowMapper()).isEmpty() || queryUsersTutorial(tutorial)==null) {
+            return null;
+        }
+        jdbcTemplate.execute("INSERT INTO tutorials VALUES(default, " + tutorial.getTutorialName() +
+                ", " + tutorial.getAuthorId() + ", " + tutorial.getMiniatureName() + ", 0;");
+        try {
+            return ResponseEntity.ok(queryUsersTutorial(tutorial));
+        } catch (DataAccessException e) {
+            return null;
+        }
+    }
+
+    private Tutorial queryUsersTutorial(Tutorial tutorial) {
+        return jdbcTemplate.queryForObject("SELECT * FROM tutorials WHERE tutorial_name = " +
+                        tutorial.getTutorialName() + " AND author_id = " + tutorial.getAuthorId(),
+                new TutorialRowMapper());
     }
 }

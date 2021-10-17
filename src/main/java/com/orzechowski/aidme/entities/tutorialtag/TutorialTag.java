@@ -12,9 +12,9 @@ public class TutorialTag
     @Id
     private long tutorialTagId;
     @Column(name = "tutorial_id")
-    private final long tutorialId;
+    private long tutorialId;
     @Column(name = "tag_id")
-    private final long tagId;
+    private long tagId;
 
     public TutorialTag(long tutorialId, long tagId)
     {

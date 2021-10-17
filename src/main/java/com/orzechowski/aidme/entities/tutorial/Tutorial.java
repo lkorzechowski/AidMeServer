@@ -12,13 +12,13 @@ public class Tutorial
     @Id
     private long tutorialId;
     @Column(name = "tutorial_name", nullable = false)
-    private final String tutorialName;
+    private String tutorialName;
     @Column(name = "author_id", nullable = false)
-    private final long authorId;
+    private long authorId;
     @Column(name = "miniature_name", nullable = false)
-    private final String miniatureName;
+    private String miniatureName;
     @Column(name = "rating", nullable = false)
-    private final float rating;
+    private float rating;
 
 
     public Tutorial(String tutorialName, long authorId, String miniatureName, float rating)

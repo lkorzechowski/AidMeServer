@@ -12,9 +12,9 @@ public class HelperTag
     @Id
     private long helperTagId;
     @Column(name = "helper_id", nullable = false)
-    private final long helperId;
+    private long helperId;
     @Column(name = "tag_id", nullable = false)
-    private final long tagId;
+    private long tagId;
 
     public HelperTag(long helperId, long tagId)
     {

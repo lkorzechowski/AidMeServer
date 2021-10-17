@@ -12,9 +12,9 @@ public class VersionInstruction
     @Id
     private long versionInstructionId;
     @Column(name = "version_id", nullable = false)
-    private final long versionId;
+    private long versionId;
     @Column(name = "instruction_position", nullable = false)
-    private final int instructionPosition;
+    private int instructionPosition;
 
     public VersionInstruction(long versionId, int instructionPosition)
     {

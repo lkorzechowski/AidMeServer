@@ -12,15 +12,15 @@ public class TutorialSound
     @Id
     private long soundId;
     @Column(name = "sound_start", nullable = false)
-    private final int soundStart;
+    private int soundStart;
     @Column(name = "sound_loop", nullable = false)
-    private final boolean soundLoop;
+    private boolean soundLoop;
     @Column(name = "interval", nullable = false)
-    private final int interval;
+    private int interval;
     @Column(name = "tutorial_id", nullable = false)
-    private final long tutorialId;
+    private long tutorialId;
     @Column(name = "file_name", nullable = false)
-    private final String fileName;
+    private String fileName;
 
     public TutorialSound(int soundStart, boolean soundLoop, int interval, long tutorialId, String fileName)
     {

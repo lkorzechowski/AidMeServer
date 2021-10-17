@@ -12,11 +12,11 @@ public class TutorialLink
     @Id
     private long tutorialLinkId;
     @Column(name = "tutorial_id", nullable = false)
-    private final long tutorialId;
+    private long tutorialId;
     @Column(name = "origin_id", nullable = false)
-    private final long originId;
+    private long originId;
     @Column(name = "instruction_number", nullable = false)
-    private final int instructionNumber;
+    private int instructionNumber;
 
     public TutorialLink(long tutorialId, long originId, int instructionNumber)
     {

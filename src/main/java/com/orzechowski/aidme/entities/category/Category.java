@@ -12,13 +12,13 @@ public class Category
     @Id
     private long categoryId;
     @Column(name = "category_name", nullable = false)
-    private final String categoryName;
+    private String categoryName;
     @Column(name = "has_subcategories", nullable = false)
-    private final boolean hasSubcategories;
+    private boolean hasSubcategories;
     @Column(name = "miniature_name")
-    private final String miniatureName;
+    private String miniatureName;
     @Column(name = "category_level", nullable = false)
-    private final int categoryLevel;
+    private int categoryLevel;
 
     public Category(String categoryName, boolean hasSubcategories, String miniatureName, int categoryLevel)
     {

@@ -12,15 +12,15 @@ public class InstructionSet
     @Id
     private long instructionSetId;
     @Column(name = "title", nullable = false)
-    private final String title;
+    private String title;
     @Column(name = "instructions", nullable = false)
-    private final String instructions;
+    private String instructions;
     @Column(name = "time", nullable = false)
-    private final int time;
+    private int time;
     @Column(name = "tutorial_id", nullable = false)
-    private final long tutorialId;
+    private long tutorialId;
     @Column(name = "instruction_position", nullable = false)
-    private final int position;
+    private int position;
     @Column(name = "narration_name")
     private String narrationName;
 

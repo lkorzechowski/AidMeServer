@@ -12,9 +12,9 @@ public class TagKeyword
     @Id
     private long tagKeywordId;
     @Column(name = "keyword_id", nullable = false)
-    private final long keywordId;
+    private long keywordId;
     @Column(name = "tag_id", nullable = false)
-    private final long tagId;
+    private long tagId;
 
     public TagKeyword(long keywordId, long tagId)
     {

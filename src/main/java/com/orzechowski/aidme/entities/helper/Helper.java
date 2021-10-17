@@ -10,32 +10,29 @@ import javax.persistence.Table;
 public class Helper
 {
     @Id
-    private final long helperId;
+    private long helperId;
     @Column(name = "helper_name", nullable = false)
-    private final String name;
+    private String name;
     @Column(name = "helper_surname", nullable = false)
-    private final String surname;
+    private String surname;
     @Column(name = "helper_title")
-    private final String title;
+    private String title;
     @Column(name = "helper_profession")
-    private final String profession;
+    private String profession;
+    @Column(name = "email")
+    private String email;
+    @Column(name = "phone")
+    private String phone;
 
-    public Helper(long helperId, String name, String surname, String title, String profession, Integer phone)
+    public Helper(long helperId, String name, String surname, String title, String profession, String email, String phone)
     {
         this.helperId = helperId;
         this.name = name;
         this.surname = surname;
         this.title = title;
         this.profession = profession;
-    }
-
-    public Helper(long helperId, String name, String surname, String title, String profession)
-    {
-        this.helperId = helperId;
-        this.name = name;
-        this.surname = surname;
-        this.title = title;
-        this.profession = profession;
+        this.email = email;
+        this.phone = phone;
     }
 
     public long getHelperId()
@@ -61,5 +58,15 @@ public class Helper
     public String getProfession()
     {
         return profession;
+    }
+
+    public String getPhone()
+    {
+        return phone;
+    }
+
+    public String getEmail()
+    {
+        return email;
     }
 }

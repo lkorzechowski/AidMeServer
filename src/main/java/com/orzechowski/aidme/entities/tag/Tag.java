@@ -12,9 +12,9 @@ public class Tag
     @Id
     private long tagId;
     @Column(name = "tag_name", nullable = false)
-    private final String tagName;
+    private String tagName;
     @Column(name = "tag_level", nullable = false)
-    private final int tagLevel;
+    private int tagLevel;
 
     public Tag(String tagName, int tagLevel)
     {

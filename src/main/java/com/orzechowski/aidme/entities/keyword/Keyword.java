@@ -12,7 +12,7 @@ public class Keyword
     @Id
     private long keywordId;
     @Column(name = "word", nullable = false)
-    private final String word;
+    private String word;
 
     public Keyword(String word)
     {

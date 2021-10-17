@@ -12,6 +12,7 @@ public class HelperRowMapper implements RowMapper<Helper>
     {
         return new Helper(rs.getLong("helper_id"), rs.getString("helper_name"),
                 rs.getString("helper_surname"), rs.getString("helper_title"),
-                rs.getString("helper_profession"));
+                rs.getString("helper_profession"), rs.getString("email"),
+                rs.getString("phone"));
     }
 }

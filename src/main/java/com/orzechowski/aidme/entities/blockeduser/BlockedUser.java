@@ -12,7 +12,7 @@ public class BlockedUser
     @Id
     private long blockedUserId;
     @Column(name = "phone_number", nullable = false)
-    private final String phoneNumber;
+    private String phoneNumber;
 
     public BlockedUser(String phoneNumber)
     {

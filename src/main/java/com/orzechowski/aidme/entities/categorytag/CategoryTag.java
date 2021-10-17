@@ -12,9 +12,9 @@ public class CategoryTag
     @Id
     private long categoryTagId;
     @Column(name = "category_id", nullable = false)
-    private final long categoryId;
+    private long categoryId;
     @Column(name = "tag_id", nullable = false)
-    private final long tagId;
+    private long tagId;
 
     public CategoryTag(long categoryTagId, long categoryId, long tagId)
     {
