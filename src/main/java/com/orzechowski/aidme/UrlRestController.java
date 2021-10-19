@@ -330,10 +330,22 @@ public class UrlRestController
     }
 
     @GetMapping("/tutoriallink/{id}")
-    public ResponseEntity<List<TutorialLink>> tutoriallinks(@PathVariable long id)
+    public ResponseEntity<List<TutorialLink>> tutorialLinks(@PathVariable long id)
     {
         try {
             return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_links WHERE origin_id = " + id,
+                    new TutorialLinkRowMapper()));
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @GetMapping("/tutoriallinks")
+    public ResponseEntity<List<TutorialLink>> allTutorialLinks()
+    {
+        try {
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_links",
                     new TutorialLinkRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
