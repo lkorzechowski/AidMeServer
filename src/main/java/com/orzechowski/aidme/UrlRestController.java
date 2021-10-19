@@ -245,6 +245,18 @@ public class UrlRestController
         }
     }
 
+    @GetMapping("/instructions")
+    public ResponseEntity<List<InstructionSet>> allInstructions()
+    {
+        try {
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM instruction_sets",
+                    new InstructionSetRowMapper()));
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     @GetMapping("/tutorialversions/{id}")
     public ResponseEntity<List<Version>> tutorialVersions(@PathVariable long id)
     {
