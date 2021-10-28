@@ -269,12 +269,12 @@ public class UrlRestController
         }
     }
 
-    @GetMapping("/versioninstructions/{id}")
-    public ResponseEntity<List<VersionInstruction>> versionInstructions(@PathVariable long id)
+    @GetMapping("/versioninstructions")
+    public ResponseEntity<List<VersionInstruction>> versionInstructions()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version_instructions WHERE version_id = "
-                            + id, new VersionInstructionRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version_instructions",
+                    new VersionInstructionRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -306,23 +306,24 @@ public class UrlRestController
     }
 
     @GetMapping("/multimedia/{id}")
-    public ResponseEntity<Multimedia> multimedia(@PathVariable long id)
+    public ResponseEntity<List<Multimedia>> multimedia(@PathVariable long id)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForObject("SELECT * FROM multimedia WHERE multimedia_id = "
-                            + id, new MultimediaRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM multimedia WHERE tutorial_id = " + id,
+                    new MultimediaRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    @GetMapping("/sound/{id}")
-    public ResponseEntity<TutorialSound> sounds(@PathVariable long id)
+
+    @GetMapping("/tutorialsounds")
+    public ResponseEntity<List<TutorialSound>> sounds()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForObject("SELECT * FROM tutorial_sounds WHERE sound_id = "
-                            + id, new TutorialSoundRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_sounds",
+                    new TutorialSoundRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
