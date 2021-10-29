@@ -7,7 +7,8 @@ import com.orzechowski.aidme.entities.category.CategoryRowMapper;
 import com.orzechowski.aidme.entities.categorytag.CategoryTag;
 import com.orzechowski.aidme.entities.categorytag.CategoryTagRowMapper;
 import com.orzechowski.aidme.entities.helper.Helper;
-import com.orzechowski.aidme.entities.helper.HelperRowMapper;
+import com.orzechowski.aidme.entities.helper.HelperBasicMapper;
+import com.orzechowski.aidme.entities.helper.HelperFullMapper;
 import com.orzechowski.aidme.entities.helpertag.HelperTag;
 import com.orzechowski.aidme.entities.helpertag.HelperTagRowMapper;
 import com.orzechowski.aidme.entities.instructionset.InstructionSet;
@@ -102,7 +103,7 @@ public class UrlRestController
     {
         try {
             return ResponseEntity.ok(jdbcTemplate.query("SELECT helper_id, helper_name, " +
-                    "helper_surname, helper_title, helper_profession FROM helpers", new HelperRowMapper()));
+                    "helper_surname, helper_title, helper_profession FROM helpers", new HelperBasicMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -257,7 +258,18 @@ public class UrlRestController
         }
     }
 
-    @GetMapping("/tutorialversions/{id}")
+    @GetMapping("/versions")
+    public ResponseEntity<List<Version>> versions()
+    {
+        try {
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM versions", new VersionRowMapper()));
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @GetMapping("/versions/{id}")
     public ResponseEntity<List<Version>> tutorialVersions(@PathVariable long id)
     {
         try {
@@ -376,7 +388,7 @@ public class UrlRestController
     {
         HttpHeaders header = makeHeader(filename);
         try {
-            Resource resource = context.getResource(pathBase + "videos/" + filename);
+            Resource resource = context.getResource(pathBase + "vids/" + filename);
             return ResponseEntity.ok()
                     .headers(header)
                     .contentLength(resource.contentLength())
@@ -436,7 +448,7 @@ public class UrlRestController
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Tutorial> insertTutorial(@PathVariable String email, @RequestBody Tutorial tutorial) {
         if(email==null || email.isEmpty() || jdbcTemplate.query("SELECT * FROM helpers WHERE email = " + email,
-                new HelperRowMapper()).isEmpty() || queryUsersTutorial(tutorial)==null) {
+                new HelperFullMapper()).isEmpty() || queryUsersTutorial(tutorial)==null) {
             return null;
         }
         jdbcTemplate.execute("INSERT INTO tutorials VALUES(default, " + tutorial.getTutorialName() +

@@ -35,6 +35,15 @@ public class Helper
         this.phone = phone;
     }
 
+    public Helper(long helperId, String name, String surname, String title, String profession)
+    {
+        this.helperId = helperId;
+        this.name = name;
+        this.surname = surname;
+        this.title = title;
+        this.profession = profession;
+    }
+
     public long getHelperId()
     {
         return helperId;

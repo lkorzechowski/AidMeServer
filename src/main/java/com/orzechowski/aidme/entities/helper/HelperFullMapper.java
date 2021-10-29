@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class HelperRowMapper implements RowMapper<Helper>
+public class HelperFullMapper implements RowMapper<Helper>
 {
     @Override
     public Helper mapRow(ResultSet rs, int rowNum) throws SQLException
