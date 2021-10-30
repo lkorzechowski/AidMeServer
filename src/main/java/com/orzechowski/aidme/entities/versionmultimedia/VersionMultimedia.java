@@ -10,17 +10,12 @@ import javax.persistence.Table;
 public class VersionMultimedia
 {
     @Id
+    @Column(name = "version_multimedia_id", nullable = false)
     private long versionMultimediaId;
     @Column(name = "multimedia_id", nullable = false)
     private long multimediaId;
     @Column(name = "version_id", nullable = false)
     private long versionId;
-
-    public VersionMultimedia(long multimediaId, long versionId)
-    {
-        this.multimediaId = multimediaId;
-        this.versionId = versionId;
-    }
 
     public VersionMultimedia(long versionMultimediaId, long multimediaId, long versionId)
     {

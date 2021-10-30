@@ -6,10 +6,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "category_tags")
+@Table(name = "category_tag")
 public class CategoryTag
 {
     @Id
+    @Column(name = "category_tag_id", nullable = false)
     private long categoryTagId;
     @Column(name = "category_id", nullable = false)
     private long categoryId;

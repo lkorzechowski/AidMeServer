@@ -6,23 +6,19 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "keywords")
+@Table(name = "keyword")
 public class Keyword
 {
     @Id
+    @Column(name = "keyword_id", nullable = false)
     private long keywordId;
-    @Column(name = "word", nullable = false)
-    private String word;
-
-    public Keyword(String word)
-    {
-        this.word = word;
-    }
+    @Column(name = "keyword", nullable = false)
+    private String keyword;
 
     public Keyword(long keywordId, String word)
     {
         this.keywordId = keywordId;
-        this.word = word;
+        this.keyword = word;
     }
 
     public long getKeywordId()
@@ -30,8 +26,8 @@ public class Keyword
         return keywordId;
     }
 
-    public String getWord()
+    public String getKeyword()
     {
-        return word;
+        return keyword;
     }
 }

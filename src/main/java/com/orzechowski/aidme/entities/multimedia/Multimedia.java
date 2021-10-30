@@ -10,29 +10,20 @@ import javax.persistence.Table;
 public class Multimedia
 {
     @Id
+    @Column(name = "multimedia_id", nullable = false)
     private long multimediaId;
     @Column(name = "tutorial_id", nullable = false)
     private long tutorialId;
-    @Column(name = "display_time", nullable = false)
+    @Column(name = "multimedia_duration", nullable = false)
     private int displayTime;
     @Column(name = "multimedia_type", nullable = false)
     private boolean type;
-    @Column(name = "file_name", nullable = false)
+    @Column(name = "multimedia_file_name", nullable = false)
     private String fileName;
     @Column(name = "multimedia_loop", nullable = false)
     private boolean loop;
     @Column(name = "multimedia_position", nullable = false)
     private int position;
-
-    public Multimedia(long tutorialId, int displayTime, boolean type, String fileName, boolean loop, int position)
-    {
-        this.tutorialId = tutorialId;
-        this.displayTime = displayTime;
-        this.type = type;
-        this.fileName = fileName;
-        this.loop = loop;
-        this.position = position;
-    }
 
     public Multimedia(long multimediaId, long tutorialId, int displayTime, boolean type, String fileName, boolean loop,
                       int position)

@@ -6,28 +6,20 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "tutorials")
+@Table(name = "tutorial")
 public class Tutorial
 {
     @Id
+    @Column(name = "tutorial_id", nullable = false)
     private long tutorialId;
     @Column(name = "tutorial_name", nullable = false)
     private String tutorialName;
     @Column(name = "author_id", nullable = false)
     private long authorId;
-    @Column(name = "miniature_name", nullable = false)
+    @Column(name = "tutorial_miniature_file", nullable = false)
     private String miniatureName;
-    @Column(name = "rating", nullable = false)
+    @Column(name = "tutorial_rating", nullable = false)
     private float rating;
-
-
-    public Tutorial(String tutorialName, long authorId, String miniatureName, float rating)
-    {
-        this.tutorialName = tutorialName;
-        this.authorId = authorId;
-        this.miniatureName = miniatureName;
-        this.rating = rating;
-    }
 
     public Tutorial(long tutorialId, String tutorialName, long authorId, String miniatureName, float rating)
     {

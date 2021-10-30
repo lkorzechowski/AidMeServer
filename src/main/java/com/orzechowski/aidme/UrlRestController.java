@@ -72,8 +72,9 @@ public class UrlRestController
     public ResponseEntity<List<Boolean>> login(@RequestParam String email)
     {
         List<Boolean> status = new LinkedList<>();
-        List<String> loginResponse = this.jdbcTemplate.queryForList("SELECT helping, verified " +
-                "WHERE email = " + email).stream().map((m) -> m.values().toString()).collect(Collectors.toList());
+        List<String> loginResponse = this.jdbcTemplate.queryForList("SELECT helping, verified FROM helper " +
+                "WHERE helper_email = " + email).stream()
+                .map((m) -> m.values().toString()).collect(Collectors.toList());
         if(!loginResponse.isEmpty()) {
             status.add(true);
             if(Objects.equals(loginResponse.get(0), "true")) status.add(true);
@@ -87,7 +88,7 @@ public class UrlRestController
     @PutMapping("/setFullHelperDetail")
     public ResponseEntity<Boolean> uploadDetail(@RequestBody Helper helper)
     {
-        this.jdbcTemplate.execute("INSERT INTO helpers VALUES " +
+        this.jdbcTemplate.execute("INSERT INTO helper VALUES " +
                     "default, '"
                     + helper.getName() + "', '"
                     + helper.getSurname() + "', '"
@@ -103,7 +104,7 @@ public class UrlRestController
     {
         try {
             return ResponseEntity.ok(jdbcTemplate.query("SELECT helper_id, helper_name, " +
-                    "helper_surname, helper_title, helper_profession FROM helpers", new HelperBasicMapper()));
+                    "helper_surname, helper_title, helper_profession FROM helper", new HelperBasicMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -139,7 +140,7 @@ public class UrlRestController
     public ResponseEntity<List<Tutorial>> tutorials()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorials", new TutorialRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial", new TutorialRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -150,7 +151,7 @@ public class UrlRestController
     public ResponseEntity<List<Category>> categories()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM categories", new CategoryRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM category", new CategoryRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -161,7 +162,7 @@ public class UrlRestController
     public ResponseEntity<List<Tag>> tags()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tags", new TagRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tag", new TagRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -172,7 +173,7 @@ public class UrlRestController
     public ResponseEntity<List<Keyword>> keywords()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM keywords", new KeywordRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM keyword", new KeywordRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -183,7 +184,7 @@ public class UrlRestController
     public ResponseEntity<List<TagKeyword>> tagKeywords()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tag_keywords", new TagKeywordRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tag_keyword", new TagKeywordRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -194,7 +195,7 @@ public class UrlRestController
     public ResponseEntity<List<BlockedUser>> blockedUsers()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM blocked_users", new BlockedUserRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM blocked_user", new BlockedUserRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -205,7 +206,7 @@ public class UrlRestController
     public ResponseEntity<List<CategoryTag>> categoryTags()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM category_tags", new CategoryTagRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM category_tag", new CategoryTagRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -216,7 +217,7 @@ public class UrlRestController
     public ResponseEntity<List<HelperTag>> helperTags()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM helper_tags", new HelperTagRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM helper_tag", new HelperTagRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -227,7 +228,7 @@ public class UrlRestController
     public ResponseEntity<List<TutorialTag>> tutorialTags()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_tags", new TutorialTagRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_tag", new TutorialTagRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -238,7 +239,7 @@ public class UrlRestController
     public ResponseEntity<List<InstructionSet>> tutorialInstructions(@PathVariable long id)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM instruction_sets WHERE tutorial_id = " + id,
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM instruction_set WHERE tutorial_id = " + id,
                     new InstructionSetRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
@@ -250,7 +251,7 @@ public class UrlRestController
     public ResponseEntity<List<InstructionSet>> allInstructions()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM instruction_sets",
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM instruction_set",
                     new InstructionSetRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
@@ -262,7 +263,7 @@ public class UrlRestController
     public ResponseEntity<List<Version>> versions()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM versions", new VersionRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version", new VersionRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -273,7 +274,7 @@ public class UrlRestController
     public ResponseEntity<List<Version>> tutorialVersions(@PathVariable long id)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM versions WHERE tutorial_id = " + id,
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version WHERE tutorial_id = " + id,
                     new VersionRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
@@ -285,7 +286,7 @@ public class UrlRestController
     public ResponseEntity<List<VersionInstruction>> versionInstructions()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version_instructions",
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version_instruction",
                     new VersionInstructionRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
@@ -334,7 +335,7 @@ public class UrlRestController
     public ResponseEntity<List<TutorialSound>> sounds()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_sounds",
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_sound",
                     new TutorialSoundRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
@@ -346,7 +347,7 @@ public class UrlRestController
     public ResponseEntity<List<TutorialLink>> tutorialLinks(@PathVariable long id)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_links WHERE origin_id = " + id,
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_link WHERE origin_id = " + id,
                     new TutorialLinkRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
@@ -358,7 +359,7 @@ public class UrlRestController
     public ResponseEntity<List<TutorialLink>> allTutorialLinks()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_links",
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_link",
                     new TutorialLinkRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
@@ -447,7 +448,7 @@ public class UrlRestController
     @PostMapping(path = "/create/tutorial", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Tutorial> insertTutorial(@PathVariable String email, @RequestBody Tutorial tutorial) {
-        if(email==null || email.isEmpty() || jdbcTemplate.query("SELECT * FROM helpers WHERE email = " + email,
+        if(email==null || email.isEmpty() || jdbcTemplate.query("SELECT * FROM helper WHERE email = " + email,
                 new HelperFullMapper()).isEmpty() || queryUsersTutorial(tutorial)==null) {
             return null;
         }

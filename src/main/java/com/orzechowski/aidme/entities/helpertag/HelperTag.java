@@ -6,21 +6,16 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "helper_tags")
+@Table(name = "helper_tag")
 public class HelperTag
 {
     @Id
+    @Column(name = "helper_tag_id", nullable = false)
     private long helperTagId;
     @Column(name = "helper_id", nullable = false)
     private long helperId;
     @Column(name = "tag_id", nullable = false)
     private long tagId;
-
-    public HelperTag(long helperId, long tagId)
-    {
-        this.helperId = helperId;
-        this.tagId = tagId;
-    }
 
     public HelperTag(long helperTagId, long helperId, long tagId)
     {

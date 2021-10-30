@@ -10,7 +10,7 @@ public class TutorialLinkRowMapper implements RowMapper<TutorialLink>
     @Override
     public TutorialLink mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new TutorialLink(rs.getLong("tutorial_link_id"), rs.getLong("tutorial_id"),
-                rs.getLong("origin_id"), rs.getInt("instruction_number"));
+        return new TutorialLink(rs.getLong(1), rs.getLong(2), rs.getLong(3),
+                rs.getInt(4));
     }
 }

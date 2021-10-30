@@ -10,7 +10,6 @@ public class CategoryTagRowMapper implements RowMapper<CategoryTag>
     @Override
     public CategoryTag mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new CategoryTag(rs.getLong("category_tag_id"), rs.getLong("category_id"),
-                rs.getLong("tag_id"));
+        return new CategoryTag(rs.getLong(1), rs.getLong(2), rs.getLong(3));
     }
 }

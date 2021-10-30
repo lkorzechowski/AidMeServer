@@ -10,9 +10,8 @@ public class MultimediaRowMapper implements RowMapper<Multimedia>
     @Override
     public Multimedia mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new Multimedia(rs.getLong("multimedia_id"), rs.getLong("tutorial_id"),
-                rs.getInt("display_time"), rs.getBoolean("multimedia_type"),
-                rs.getString("file_name"), rs.getBoolean("multimedia_loop"),
-                rs.getInt("multimedia_position"));
+        return new Multimedia(rs.getLong(1), rs.getLong(2), rs.getInt(3),
+                rs.getBoolean(3), rs.getString(4), rs.getBoolean(5),
+                rs.getInt(6));
     }
 }

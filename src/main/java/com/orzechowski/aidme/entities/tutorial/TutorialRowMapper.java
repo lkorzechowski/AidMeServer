@@ -10,8 +10,7 @@ public class TutorialRowMapper implements RowMapper<Tutorial>
     @Override
     public Tutorial mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new Tutorial(rs.getLong("tutorial_id"), rs.getString("tutorial_name"),
-                rs.getLong("author_id"), rs.getString("miniature_name"),
-                rs.getFloat("rating"));
+        return new Tutorial(rs.getLong(1), rs.getString(2), rs.getLong(3),
+                rs.getString(4), rs.getFloat(5));
     }
 }

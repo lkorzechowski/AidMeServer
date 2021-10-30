@@ -10,7 +10,6 @@ public class TutorialTagRowMapper implements RowMapper<TutorialTag>
     @Override
     public TutorialTag mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new TutorialTag(rs.getLong("tutorial_tag_id"), rs.getLong("tutorial_id"),
-                rs.getLong("tag_id"));
+        return new TutorialTag(rs.getLong(1), rs.getLong(2), rs.getLong(3));
     }
 }

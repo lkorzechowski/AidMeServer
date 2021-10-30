@@ -6,21 +6,16 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "version_instructions")
+@Table(name = "version_instruction")
 public class VersionInstruction
 {
     @Id
+    @Column(name = "version_instruction_id", nullable = false)
     private long versionInstructionId;
     @Column(name = "version_id", nullable = false)
     private long versionId;
     @Column(name = "instruction_position", nullable = false)
     private int instructionPosition;
-
-    public VersionInstruction(long versionId, int instructionPosition)
-    {
-        this.versionId = versionId;
-        this.instructionPosition = instructionPosition;
-    }
 
     public VersionInstruction(long versionInstructionId, long versionId, int instructionPosition)
     {

@@ -10,7 +10,6 @@ public class HelperTagRowMapper implements RowMapper<HelperTag>
     @Override
     public HelperTag mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new HelperTag(rs.getLong("helper_tag_id"), rs.getLong("helper_id"),
-                rs.getLong("tag_id"));
+        return new HelperTag(rs.getLong(1), rs.getLong(2), rs.getLong(3));
     }
 }

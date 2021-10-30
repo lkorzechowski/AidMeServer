@@ -6,28 +6,16 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "blocked_users")
+@Table(name = "blocked_user")
 public class BlockedUser
 {
     @Id
-    private long blockedUserId;
-    @Column(name = "phone_number", nullable = false)
+    @Column(name = "blocked_phone_number", nullable = false)
     private String phoneNumber;
 
     public BlockedUser(String phoneNumber)
     {
         this.phoneNumber = phoneNumber;
-    }
-
-    public BlockedUser(long blockedUserId, String phoneNumber)
-    {
-        this.blockedUserId = blockedUserId;
-        this.phoneNumber = phoneNumber;
-    }
-
-    public long getBlockedUserId()
-    {
-        return blockedUserId;
     }
 
     public String getPhoneNumber()

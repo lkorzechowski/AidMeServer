@@ -6,16 +6,17 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "category")
 public class Category
 {
     @Id
+    @Column(name = "category_id", nullable = false)
     private long categoryId;
     @Column(name = "category_name", nullable = false)
     private String categoryName;
     @Column(name = "has_subcategories", nullable = false)
     private boolean hasSubcategories;
-    @Column(name = "miniature_name")
+    @Column(name = "category_miniature_name")
     private String miniatureName;
     @Column(name = "category_level", nullable = false)
     private int categoryLevel;

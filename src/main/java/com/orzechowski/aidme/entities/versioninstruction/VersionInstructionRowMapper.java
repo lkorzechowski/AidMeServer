@@ -10,7 +10,6 @@ public class VersionInstructionRowMapper implements RowMapper<VersionInstruction
     @Override
     public VersionInstruction mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new VersionInstruction(rs.getLong("version_instruction_id"),
-                rs.getLong("version_id"), rs.getInt("instruction_position"));
+        return new VersionInstruction(rs.getLong(1), rs.getLong(2), rs.getInt(3));
     }
 }

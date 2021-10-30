@@ -6,43 +6,24 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "documents")
+@Table(name = "document")
 public class Document
 {
     @Id
+    @Column(name = "document_id", nullable = false)
     private long documentId;
-    @Column(name = "file_name", nullable = false)
+    @Column(name = "document_file_name", nullable = false)
     private String fileName;
-    @Column(name = "description")
+    @Column(name = "document_description")
     private String description;
     @Column(name = "helper_id", nullable = false)
     private long helperId;
-
-    public Document(String fileName, String description, long helperId)
-    {
-        this.fileName = fileName;
-        this.description = description;
-        this.helperId = helperId;
-    }
 
     public Document(long documentId, String fileName, String description, long helperId)
     {
         this.documentId = documentId;
         this.fileName = fileName;
         this.description = description;
-        this.helperId = helperId;
-    }
-
-    public Document(String fileName, int helperId)
-    {
-        this.fileName = fileName;
-        this.helperId = helperId;
-    }
-
-    public Document(long documentId, String fileName, long helperId)
-    {
-        this.documentId = documentId;
-        this.fileName = fileName;
         this.helperId = helperId;
     }
 }

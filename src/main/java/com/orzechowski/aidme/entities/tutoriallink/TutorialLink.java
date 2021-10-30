@@ -6,10 +6,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "tutorial_links")
+@Table(name = "tutorial_link")
 public class TutorialLink
 {
     @Id
+    @Column(name = "tutorial_link_id", nullable = false)
     private long tutorialLinkId;
     @Column(name = "tutorial_id", nullable = false)
     private long tutorialId;
@@ -17,13 +18,6 @@ public class TutorialLink
     private long originId;
     @Column(name = "instruction_number", nullable = false)
     private int instructionNumber;
-
-    public TutorialLink(long tutorialId, long originId, int instructionNumber)
-    {
-        this.tutorialId = tutorialId;
-        this.originId = originId;
-        this.instructionNumber = instructionNumber;
-    }
 
     public TutorialLink(long tutorialLinkId, long tutorialId, long originId, int instructionNumber)
     {

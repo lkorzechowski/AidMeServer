@@ -6,32 +6,24 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "versions")
+@Table(name = "version")
 public class Version
 {
     @Id
+    @Column(name = "version_id", nullable = false)
     private long versionId;
-    @Column(name = "text", nullable = false)
+    @Column(name = "version_text", nullable = false)
     private String text;
     @Column(name = "tutorial_id", nullable = false)
     private long tutorialId;
-    @Column(name = "delay_global_sound", nullable = false)
+    @Column(name = "version_sound_delay", nullable = false)
     private boolean delayGlobalSound;
-    @Column(name = "has_children", nullable = false)
+    @Column(name = "version_has_children", nullable = false)
     private boolean hasChildren;
-    @Column(name = "has_parent", nullable = false)
+    @Column(name = "version_has_parent", nullable = false)
     private boolean hasParent;
     @Column(name = "parent_version_id")
     private long parentVersionId;
-
-    public Version(String text, long tutorialId, boolean delayGlobalSound, boolean hasChildren, boolean hasParent)
-    {
-        this.text = text;
-        this.tutorialId = tutorialId;
-        this.delayGlobalSound = delayGlobalSound;
-        this.hasChildren = hasChildren;
-        this.hasParent = hasParent;
-    }
 
     public Version(long versionId, String text, long tutorialId, boolean delayGlobalSound, boolean hasChildren,
                    boolean hasParent)
@@ -42,17 +34,6 @@ public class Version
         this.delayGlobalSound = delayGlobalSound;
         this.hasChildren = hasChildren;
         this.hasParent = hasParent;
-    }
-
-    public Version(String text, long tutorialId, boolean delayGlobalSound, boolean hasChildren, boolean hasParent,
-                   long parentVersionId)
-    {
-        this.text = text;
-        this.tutorialId = tutorialId;
-        this.delayGlobalSound = delayGlobalSound;
-        this.hasChildren = hasChildren;
-        this.hasParent = hasParent;
-        this.parentVersionId = parentVersionId;
     }
 
     public Version(long versionId, String text, long tutorialId, boolean delayGlobalSound, boolean hasChildren,

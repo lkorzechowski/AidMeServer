@@ -10,9 +10,8 @@ public class VersionRowMapper implements RowMapper<Version>
     @Override
     public Version mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new Version(rs.getLong("version_id"), rs.getString("text"),
-                rs.getLong("tutorial_id"), rs.getBoolean("delay_global_sound"),
-                rs.getBoolean("has_children"), rs.getBoolean("has_parent"),
-                rs.getLong("parent_version_id"));
+        return new Version(rs.getLong(1), rs.getString(2), rs.getLong(3),
+                rs.getBoolean(4), rs.getBoolean(5), rs.getBoolean(6),
+                rs.getLong(7));
     }
 }

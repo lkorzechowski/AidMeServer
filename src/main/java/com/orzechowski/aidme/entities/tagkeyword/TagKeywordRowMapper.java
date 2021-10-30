@@ -10,7 +10,6 @@ public class TagKeywordRowMapper implements RowMapper<TagKeyword>
     @Override
     public TagKeyword mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new TagKeyword(rs.getLong("tag_keyword_id"), rs.getLong("keyword_id"),
-                rs.getLong("tag_id"));
+        return new TagKeyword(rs.getLong(1), rs.getLong(3), rs.getLong(2));
     }
 }

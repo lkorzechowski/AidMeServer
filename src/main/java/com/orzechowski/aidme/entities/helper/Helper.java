@@ -6,10 +6,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "helpers")
+@Table(name = "helper")
 public class Helper
 {
     @Id
+    @Column(name = "helper_id", nullable = false)
     private long helperId;
     @Column(name = "helper_name", nullable = false)
     private String name;
@@ -19,9 +20,9 @@ public class Helper
     private String title;
     @Column(name = "helper_profession")
     private String profession;
-    @Column(name = "email")
+    @Column(name = "helper_email")
     private String email;
-    @Column(name = "phone")
+    @Column(name = "helper_phone")
     private String phone;
 
     public Helper(long helperId, String name, String surname, String title, String profession, String email, String phone)

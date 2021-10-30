@@ -10,7 +10,6 @@ public class VersionMultimediaRowMapper implements RowMapper<VersionMultimedia>
     @Override
     public VersionMultimedia mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new VersionMultimedia(rs.getLong("version_multimedia_id"),
-                rs.getLong("multimedia_id"), rs.getLong("version_id"));
+        return new VersionMultimedia(rs.getLong(1), rs.getLong(3), rs.getLong(2));
     }
 }

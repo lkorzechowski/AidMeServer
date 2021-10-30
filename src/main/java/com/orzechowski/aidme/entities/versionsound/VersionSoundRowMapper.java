@@ -10,7 +10,7 @@ public class VersionSoundRowMapper implements RowMapper<VersionSound>
     @Override
     public VersionSound mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new VersionSound(rs.getLong("version_sound_id"), rs.getLong("sound_id"),
-                rs.getLong("version_id"));
+        return new VersionSound(rs.getLong(1), rs.getLong(3),
+                rs.getLong(2));
     }
 }

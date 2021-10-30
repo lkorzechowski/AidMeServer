@@ -10,9 +10,7 @@ public class InstructionSetRowMapper implements RowMapper<InstructionSet>
     @Override
     public InstructionSet mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new InstructionSet(rs.getLong("instruction_set_id"), rs.getString("title"),
-                rs.getString("instructions"), rs.getInt("time"),
-                rs.getLong("tutorial_id"), rs.getInt("set_position"),
-                rs.getString("narration_name"));
+        return new InstructionSet(rs.getLong(1), rs.getString(2), rs.getString(3),
+                rs.getInt(4), rs.getLong(5), rs.getInt(6), rs.getString(7));
     }
 }
