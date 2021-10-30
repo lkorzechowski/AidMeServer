@@ -21,14 +21,6 @@ public class Category
     @Column(name = "category_level", nullable = false)
     private int categoryLevel;
 
-    public Category(String categoryName, boolean hasSubcategories, String miniatureName, int categoryLevel)
-    {
-        this.categoryName = categoryName;
-        this.hasSubcategories = hasSubcategories;
-        this.miniatureName = miniatureName;
-        this.categoryLevel = categoryLevel;
-    }
-
     public Category(long categoryId, String categoryName, boolean hasSubcategories, String miniatureName,
                     int categoryLevel)
     {

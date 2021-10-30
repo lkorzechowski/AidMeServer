@@ -140,7 +140,8 @@ public class UrlRestController
     public ResponseEntity<List<Tutorial>> tutorials()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial", new TutorialRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial WHERE approved = t",
+                    new TutorialRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -447,13 +448,14 @@ public class UrlRestController
 
     @PostMapping(path = "/create/tutorial", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Tutorial> insertTutorial(@PathVariable String email, @RequestBody Tutorial tutorial) {
+    public ResponseEntity<Tutorial> insertTutorial(@PathVariable String email, @RequestBody Tutorial tutorial)
+    {
         if(email==null || email.isEmpty() || jdbcTemplate.query("SELECT * FROM helper WHERE email = " + email,
                 new HelperFullMapper()).isEmpty() || queryUsersTutorial(tutorial)==null) {
             return null;
         }
         jdbcTemplate.execute("INSERT INTO tutorials VALUES(default, " + tutorial.getTutorialName() +
-                ", " + tutorial.getAuthorId() + ", " + tutorial.getMiniatureName() + ", 0;");
+                ", " + tutorial.getAuthorId() + ", " + tutorial.getMiniatureName() + ", 0, false;");
         try {
             return ResponseEntity.ok(queryUsersTutorial(tutorial));
         } catch (DataAccessException e) {
@@ -461,7 +463,8 @@ public class UrlRestController
         }
     }
 
-    private Tutorial queryUsersTutorial(Tutorial tutorial) {
+    private Tutorial queryUsersTutorial(Tutorial tutorial)
+    {
         return jdbcTemplate.queryForObject("SELECT * FROM tutorials WHERE tutorial_name = " +
                         tutorial.getTutorialName() + " AND author_id = " + tutorial.getAuthorId(),
                 new TutorialRowMapper());
