@@ -37,6 +37,7 @@ import com.orzechowski.aidme.entities.versionmultimedia.VersionMultimedia;
 import com.orzechowski.aidme.entities.versionmultimedia.VersionMultimediaRowMapper;
 import com.orzechowski.aidme.entities.versionsound.VersionSound;
 import com.orzechowski.aidme.entities.versionsound.VersionSoundRowMapper;
+import net.minidev.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
@@ -68,12 +69,12 @@ public class UrlRestController
         this.context = context;
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<List<Boolean>> login(@RequestParam String email)
+    @GetMapping("/login/{email}")
+    public ResponseEntity<JSONArray> login(@PathVariable String email)
     {
-        List<Boolean> status = new LinkedList<>();
+        JSONArray status = new JSONArray();
         List<String> loginResponse = this.jdbcTemplate.queryForList("SELECT helping, verified FROM helper " +
-                "WHERE helper_email = " + email).stream()
+                "WHERE helper_email = " + email.replace('%', '.')).stream()
                 .map((m) -> m.values().toString()).collect(Collectors.toList());
         if(!loginResponse.isEmpty()) {
             status.add(true);
@@ -462,6 +463,21 @@ public class UrlRestController
             return null;
         }
     }
+
+    @PutMapping(path = "/help/{email}/{help}")
+    public ResponseEntity<Boolean> toggleHelp(@PathVariable String email, @PathVariable String help)
+    {
+        if(Objects.equals(help, "t")) {
+            this.jdbcTemplate.execute("UPDATE helper SET helping = true WHERE helper_email = " +
+                    email.replace('%', '.'));
+            return ResponseEntity.ok(true);
+        } else {
+            this.jdbcTemplate.execute("UPDATE helper SET helping = false WHERE helper_email = " +
+                    email.replace('%', '.'));
+            return ResponseEntity.ok(false);
+        }
+    }
+
 
     private Tutorial queryUsersTutorial(Tutorial tutorial)
     {
