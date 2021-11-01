@@ -6,9 +6,7 @@ import com.orzechowski.aidme.entities.category.Category;
 import com.orzechowski.aidme.entities.category.CategoryRowMapper;
 import com.orzechowski.aidme.entities.categorytag.CategoryTag;
 import com.orzechowski.aidme.entities.categorytag.CategoryTagRowMapper;
-import com.orzechowski.aidme.entities.helper.Helper;
-import com.orzechowski.aidme.entities.helper.HelperBasicMapper;
-import com.orzechowski.aidme.entities.helper.HelperFullMapper;
+import com.orzechowski.aidme.entities.helper.*;
 import com.orzechowski.aidme.entities.helpertag.HelperTag;
 import com.orzechowski.aidme.entities.helpertag.HelperTagRowMapper;
 import com.orzechowski.aidme.entities.instructionset.InstructionSet;
@@ -37,7 +35,6 @@ import com.orzechowski.aidme.entities.versionmultimedia.VersionMultimedia;
 import com.orzechowski.aidme.entities.versionmultimedia.VersionMultimediaRowMapper;
 import com.orzechowski.aidme.entities.versionsound.VersionSound;
 import com.orzechowski.aidme.entities.versionsound.VersionSoundRowMapper;
-import net.minidev.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
@@ -52,11 +49,14 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @RestController
 public class UrlRestController
 {
+    //encoding guide:
+    //xyz121 = .
+    //xyz122 = @
+
     @Autowired
     private final JdbcTemplate jdbcTemplate;
     private final ApplicationContext context;
@@ -70,33 +70,39 @@ public class UrlRestController
     }
 
     @GetMapping("/login/{email}")
-    public ResponseEntity<JSONArray> login(@PathVariable String email)
+    public ResponseEntity<Login> login(@PathVariable String email)
     {
-        JSONArray status = new JSONArray();
-        List<String> loginResponse = this.jdbcTemplate.queryForList("SELECT helping, verified FROM helper " +
-                "WHERE helper_email = " + email.replace('%', '.')).stream()
-                .map((m) -> m.values().toString()).collect(Collectors.toList());
-        if(!loginResponse.isEmpty()) {
-            status.add(true);
-            if(Objects.equals(loginResponse.get(0), "true")) status.add(true);
-            if(Objects.equals(loginResponse.get(1), "true")) status.add(true);
+        email = email.replace("xyz121", ".").replace("xyz122", "@");
+        Login loginResponse = jdbcTemplate.queryForObject("SELECT verified, helping FROM helper " +
+                "WHERE helper_email = '" + email + "'", new HelperLoginMapper());
+        if(loginResponse!=null) {
+            return ResponseEntity.ok(loginResponse);
         } else {
-            status.add(false);
+            jdbcTemplate.execute("INSERT INTO helper VALUES default, null, null, null, null, '" + email +
+                    "', null, false, false");
+            return ResponseEntity.ok(new Login(false, false));
         }
-        return ResponseEntity.ok(status);
+    }
+
+    @GetMapping("/fullhelperdetailforemail/{email}")
+    public ResponseEntity<Helper> fullDetail(@PathVariable String email)
+    {
+        try {
+            return ResponseEntity.ok(jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_email = '" +
+                    email + "'", new HelperFullMapper()));
+        } catch(DataAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @PutMapping("/setFullHelperDetail")
     public ResponseEntity<Boolean> uploadDetail(@RequestBody Helper helper)
     {
-        this.jdbcTemplate.execute("INSERT INTO helper VALUES " +
-                    "default, '"
-                    + helper.getName() + "', '"
-                    + helper.getSurname() + "', '"
-                    + helper.getTitle() + "', '"
-                    + helper.getProfession() + "', '"
-                    + helper.getEmail() + "', "
-                    + helper.getPhone() + ", 'false', 'false'");
+        jdbcTemplate.execute("UPDATE helper SET helper_name = '" + helper.getName() + "', helper_surname = '" +
+                helper.getSurname() + "', helper_title = '" + helper.getTitle() + "', helper_profession = '" +
+                helper.getProfession() + "', helper_phone = '" + helper.getPhone() + "' WHERE helper_id = " +
+                helper.getHelperId());
         return ResponseEntity.ok(true);
     }
 
@@ -111,32 +117,20 @@ public class UrlRestController
             return null;
         }
     }
-/*
+
     @GetMapping("/number/{id}")
     public ResponseEntity<Helper> helperNumber(@PathVariable long id)
     {
         try {
-            Connection connection = DriverManager.getConnection(url, user, password);
-            PreparedStatement preparedStatement =
-                    connection.prepareStatement("SELECT h.* FROM helpers h " +
+            return ResponseEntity.ok(jdbcTemplate.queryForObject("SELECT h.* FROM helpers h" +
                             "JOIN helper_tags ht ON h.helper_id = ht.helper_id " +
-                            "JOIN tags t ON ht.tag_id = t.tag_id WHERE t.tag_id = " + id);
-            ResultSet rs = preparedStatement.executeQuery();
-            while(rs.next()) {
-                Helper helper = new Helper(rs.getInt("helper_id"), rs.getString("helper_name"),
-                        rs.getString("helper_surname"), rs.getString("helper_title"),
-                        rs.getString("helper_profession"), rs.getInt("phone"));
-                if(!occupiedHelpers.contains(helper)) {
-                    occupiedHelpers.add(helper);
-                    return ResponseEntity.ok(helper);
-                }
-            }
-        } catch (SQLException e) {
+                            "JOIN tags t ON ht.tag_id = t.tag_id WHERE t.tag_id = " + id, new HelperFullMapper()));
+        } catch (DataAccessException e) {
             e.printStackTrace();
         }
         return null;
     }
-*/
+
     @GetMapping("/tutorials")
     public ResponseEntity<List<Tutorial>> tutorials()
     {
@@ -451,12 +445,13 @@ public class UrlRestController
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Tutorial> insertTutorial(@PathVariable String email, @RequestBody Tutorial tutorial)
     {
-        if(email==null || email.isEmpty() || jdbcTemplate.query("SELECT * FROM helper WHERE email = " + email,
+        if(email==null || email.isEmpty() || jdbcTemplate.query("SELECT * FROM helper WHERE helper_email = " + email
+                        .replace("xyz121", ".").replace("xyz122", "@"),
                 new HelperFullMapper()).isEmpty() || queryUsersTutorial(tutorial)==null) {
             return null;
         }
         jdbcTemplate.execute("INSERT INTO tutorials VALUES(default, " + tutorial.getTutorialName() +
-                ", " + tutorial.getAuthorId() + ", " + tutorial.getMiniatureName() + ", 0, false;");
+                ", " + tutorial.getAuthorId() + ", " + tutorial.getMiniatureName() + ", 0, 'f';");
         try {
             return ResponseEntity.ok(queryUsersTutorial(tutorial));
         } catch (DataAccessException e) {
@@ -464,25 +459,23 @@ public class UrlRestController
         }
     }
 
-    @PutMapping(path = "/help/{email}/{help}")
-    public ResponseEntity<Boolean> toggleHelp(@PathVariable String email, @PathVariable String help)
+    @GetMapping(path = "/help/{email}/{help}")
+    public ResponseEntity<Helping> toggleHelp(@PathVariable String email, @PathVariable String help)
     {
+        email = email.replace("xyz121", ".").replace("xyz122", "@");
         if(Objects.equals(help, "t")) {
-            this.jdbcTemplate.execute("UPDATE helper SET helping = true WHERE helper_email = " +
-                    email.replace('%', '.'));
-            return ResponseEntity.ok(true);
+            this.jdbcTemplate.execute("UPDATE helper SET helping = 't' WHERE helper_email = '" + email + "'");
+            return ResponseEntity.ok(new Helping(true));
         } else {
-            this.jdbcTemplate.execute("UPDATE helper SET helping = false WHERE helper_email = " +
-                    email.replace('%', '.'));
-            return ResponseEntity.ok(false);
+            this.jdbcTemplate.execute("UPDATE helper SET helping = 'f' WHERE helper_email = '" + email + "'");
+            return ResponseEntity.ok(new Helping(false));
         }
     }
 
-
     private Tutorial queryUsersTutorial(Tutorial tutorial)
     {
-        return jdbcTemplate.queryForObject("SELECT * FROM tutorials WHERE tutorial_name = " +
-                        tutorial.getTutorialName() + " AND author_id = " + tutorial.getAuthorId(),
+        return jdbcTemplate.queryForObject("SELECT * FROM tutorials WHERE tutorial_name = '" +
+                        tutorial.getTutorialName() + "' AND author_id = '" + tutorial.getAuthorId() + "'",
                 new TutorialRowMapper());
     }
 }
