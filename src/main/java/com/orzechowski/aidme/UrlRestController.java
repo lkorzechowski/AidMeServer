@@ -89,20 +89,31 @@ public class UrlRestController
     {
         try {
             return ResponseEntity.ok(jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_email = '" +
-                    email + "'", new HelperFullMapper()));
+                    email.replace("xyz121", ".").replace("xyz122", "@") + "'",
+                    new HelperFullMapper()));
         } catch(DataAccessException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    @PutMapping("/setFullHelperDetail")
-    public ResponseEntity<Boolean> uploadDetail(@RequestBody Helper helper)
+    @GetMapping("/setfullhelperdetailforemail/{email}/{id}/{name}/{surname}/{title}/{profession}/{phone}")
+    public ResponseEntity<Boolean> uploadDetail(@PathVariable String email, @PathVariable String id,
+                                                @PathVariable String name, @PathVariable String surname,
+                                                @PathVariable String title, @PathVariable String profession,
+                                                @PathVariable String phone)
     {
-        jdbcTemplate.execute("UPDATE helper SET helper_name = '" + helper.getName() + "', helper_surname = '" +
-                helper.getSurname() + "', helper_title = '" + helper.getTitle() + "', helper_profession = '" +
-                helper.getProfession() + "', helper_phone = '" + helper.getPhone() + "' WHERE helper_id = " +
-                helper.getHelperId());
+        String query = "UPDATE helper SET helper_name = '" + name + "', helper_surname = '" + surname + "'";
+        if(!Objects.equals(title, "null")) {
+            query = query + ", helper_title = '" + title + "'";
+        }
+        if(!Objects.equals(profession, "null")) {
+            query = query + ", helper_profession = '" + profession + "'";
+        }
+        if(!Objects.equals(phone, "null")) {
+            query = query + ", helper_phone = '" + phone + "'";
+        }
+        jdbcTemplate.execute(query + " WHERE helper_id = " + id + " AND helper_email = '" + email + "'");
         return ResponseEntity.ok(true);
     }
 
