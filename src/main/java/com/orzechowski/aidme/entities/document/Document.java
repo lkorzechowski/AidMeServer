@@ -26,4 +26,24 @@ public class Document
         this.description = description;
         this.helperId = helperId;
     }
+
+    public long getDocumentId()
+    {
+        return documentId;
+    }
+
+    public String getFileName()
+    {
+        return fileName;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public long getHelperId()
+    {
+        return helperId;
+    }
 }

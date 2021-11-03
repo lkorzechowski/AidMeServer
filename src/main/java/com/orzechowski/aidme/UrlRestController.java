@@ -6,6 +6,8 @@ import com.orzechowski.aidme.entities.category.Category;
 import com.orzechowski.aidme.entities.category.CategoryRowMapper;
 import com.orzechowski.aidme.entities.categorytag.CategoryTag;
 import com.orzechowski.aidme.entities.categorytag.CategoryTagRowMapper;
+import com.orzechowski.aidme.entities.document.Document;
+import com.orzechowski.aidme.entities.document.DocumentRowMapper;
 import com.orzechowski.aidme.entities.helper.*;
 import com.orzechowski.aidme.entities.helpertag.HelperTag;
 import com.orzechowski.aidme.entities.helpertag.HelperTagRowMapper;
@@ -44,8 +46,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -371,6 +374,50 @@ public class UrlRestController
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    @GetMapping("/documentexists/{email}")
+    public ResponseEntity<Document> checkDocument(@PathVariable String email)
+    {
+        try {
+            return ResponseEntity.ok(jdbcTemplate
+                    .queryForObject("SELECT d.* FROM document d JOIN helper h ON d.helper_id = " +
+                                    "h.helper_id WHERE h.helper_email = " + email
+                                    .replace("xyz121", ".").replace("xyz122", "@"),
+                            new DocumentRowMapper()));
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    @GetMapping("/userdocumentuploadimage")
+    public ResponseEntity<Boolean> uploadDocument(@RequestParam("image") MultipartFile file)
+    {
+        try {
+            File imageFile = new File(pathBase + "docs/" + file.getName() + ".jpeg");
+            FileOutputStream outputStream = new FileOutputStream(imageFile);
+            outputStream.write(file.getBytes());
+            return ResponseEntity.ok(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.ok(false);
+        }
+    }
+
+    @GetMapping("/tutorialcreationuploadimagemultimedia/{name}")
+    public ResponseEntity<Boolean> uploadImage(@RequestParam("image") MultipartFile file, @PathVariable String name)
+    {
+        try {
+            File imageFile = new File(pathBase + "images/" + name + ".jpeg");
+            FileOutputStream outputStream = new FileOutputStream(imageFile);
+            outputStream.write(file.getBytes());
+            return ResponseEntity.ok(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.ok(false);
         }
     }
 
