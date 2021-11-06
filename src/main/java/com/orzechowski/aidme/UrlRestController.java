@@ -1,5 +1,9 @@
 package com.orzechowski.aidme;
 
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import com.orzechowski.aidme.entities.blockeduser.BlockedUser;
 import com.orzechowski.aidme.entities.blockeduser.BlockedUserRowMapper;
 import com.orzechowski.aidme.entities.category.Category;
@@ -65,6 +69,7 @@ public class UrlRestController
     private final ApplicationContext context;
     private final static String pathBase = "gs://aidme/";
     private final List<Helper> occupiedHelpers = new LinkedList<>();
+    private final String projectId = "aidme-326515";
 
     public UrlRestController(JdbcTemplate jdbcTemplate, ApplicationContext context)
     {
@@ -304,11 +309,11 @@ public class UrlRestController
         }
     }
 
-    @GetMapping("/versionmultimedia/{id}")
-    public ResponseEntity<List<VersionMultimedia>> versionMultimedia(@PathVariable long id)
+    @GetMapping("/versionmultimedia")
+    public ResponseEntity<List<VersionMultimedia>> versionMultimedia()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version_multimedia WHERE version_id = " + id,
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version_multimedia",
                     new VersionMultimediaRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
@@ -316,11 +321,11 @@ public class UrlRestController
         }
     }
 
-    @GetMapping("/versionsound/{id}")
-    public ResponseEntity<List<VersionSound>> versionSounds(@PathVariable long id)
+    @GetMapping("/versionsound")
+    public ResponseEntity<List<VersionSound>> versionSounds()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version_sound WHERE version_id = " + id,
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version_sound",
                     new VersionSoundRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
@@ -383,8 +388,9 @@ public class UrlRestController
         try {
             return ResponseEntity.ok(jdbcTemplate
                     .queryForObject("SELECT d.* FROM document d JOIN helper h ON d.helper_id = " +
-                                    "h.helper_id WHERE h.helper_email = " + email
-                                    .replace("xyz121", ".").replace("xyz122", "@"),
+                                    "h.helper_id WHERE h.helper_email = '" + email
+                                    .replace("xyz121", ".").replace("xyz122", "@") +
+                                    "'",
                             new DocumentRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
@@ -392,28 +398,25 @@ public class UrlRestController
         }
     }
 
-
-    @GetMapping("/userdocumentuploadimage")
-    public ResponseEntity<Boolean> uploadDocument(@RequestParam("image") MultipartFile file)
+    @GetMapping(value=("/userdocumentuploadimage/{email}"))//, headers=("content-type=multipart/*"))
+    public ResponseEntity<Boolean> uploadDocument(@RequestParam MultipartFile file, @PathVariable String email)
+            throws IOException
     {
-        try {
-            File imageFile = new File(pathBase + "docs/" + file.getName() + ".jpeg");
-            FileOutputStream outputStream = new FileOutputStream(imageFile);
-            outputStream.write(file.getBytes());
-            return ResponseEntity.ok(true);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.ok(false);
-        }
+        Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
+        BlobId blobId = BlobId.of(pathBase, email);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+        storage.create(blobInfo, file.getBytes());
+        return ResponseEntity.ok(true);
     }
 
     @GetMapping("/tutorialcreationuploadimagemultimedia/{name}")
     public ResponseEntity<Boolean> uploadImage(@RequestParam("image") MultipartFile file, @PathVariable String name)
     {
+        Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
+        BlobId blobId = BlobId.of(pathBase, name);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
         try {
-            File imageFile = new File(pathBase + "images/" + name + ".jpeg");
-            FileOutputStream outputStream = new FileOutputStream(imageFile);
-            outputStream.write(file.getBytes());
+            storage.create(blobInfo, file.getBytes());
             return ResponseEntity.ok(true);
         } catch (IOException e) {
             e.printStackTrace();
