@@ -1,9 +1,5 @@
 package com.orzechowski.aidme;
 
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
 import com.orzechowski.aidme.entities.blockeduser.BlockedUser;
 import com.orzechowski.aidme.entities.blockeduser.BlockedUserRowMapper;
 import com.orzechowski.aidme.entities.category.Category;
@@ -41,9 +37,14 @@ import com.orzechowski.aidme.entities.versionmultimedia.VersionMultimedia;
 import com.orzechowski.aidme.entities.versionmultimedia.VersionMultimediaRowMapper;
 import com.orzechowski.aidme.entities.versionsound.VersionSound;
 import com.orzechowski.aidme.entities.versionsound.VersionSoundRowMapper;
+import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.WritableResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -51,6 +52,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import java.io.*;
 import java.util.LinkedList;
@@ -60,16 +63,35 @@ import java.util.Objects;
 @RestController
 public class UrlRestController
 {
-    //encoding guide:
+    //szyfrowanie znakow w linii zapytania
     //xyz121 = .
     //xyz122 = @
+
+    @Bean
+    public MultipartResolver multipartResolver()
+    {
+        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
+        multipartResolver.setMaxUploadSize(10000000);
+        return multipartResolver;
+    }
+
+    @Bean
+    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> tomcatCustomizer()
+    {
+        return (tomcat) -> tomcat.addConnectorCustomizers((connector) -> {
+            if (connector.getProtocolHandler() instanceof AbstractHttp11Protocol) {
+                AbstractHttp11Protocol<?> protocolHandler = (AbstractHttp11Protocol<?>) connector.getProtocolHandler();
+                protocolHandler.setDisableUploadTimeout(true);
+                protocolHandler.setConnectionUploadTimeout(60000);
+            }
+        });
+    }
 
     @Autowired
     private final JdbcTemplate jdbcTemplate;
     private final ApplicationContext context;
     private final static String pathBase = "gs://aidme/";
     private final List<Helper> occupiedHelpers = new LinkedList<>();
-    private final String projectId = "aidme-326515";
 
     public UrlRestController(JdbcTemplate jdbcTemplate, ApplicationContext context)
     {
@@ -386,42 +408,52 @@ public class UrlRestController
     public ResponseEntity<Document> checkDocument(@PathVariable String email)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate
-                    .queryForObject("SELECT d.* FROM document d JOIN helper h ON d.helper_id = " +
-                                    "h.helper_id WHERE h.helper_email = '" + email
-                                    .replace("xyz121", ".").replace("xyz122", "@") +
-                                    "'",
-                            new DocumentRowMapper()));
+            Document doc = jdbcTemplate.queryForObject("SELECT d.* FROM document d JOIN helper h ON d.helper_id = "
+                            + "h.helper_id WHERE h.helper_email = '" + email.replace("xyz121", ".")
+                            .replace("xyz122", "@") + "'", new DocumentRowMapper());
+            if(doc!=null) {
+                return ResponseEntity.ok(doc);
+            } else {
+                return ResponseEntity.ok(null);
+            }
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    @GetMapping(value=("/userdocumentuploadimage/{email}"))//, headers=("content-type=multipart/*"))
+    @PostMapping("/userdocumentuploadimage/{email}")
     public ResponseEntity<Boolean> uploadDocument(@RequestParam MultipartFile file, @PathVariable String email)
-            throws IOException
     {
-        Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
-        BlobId blobId = BlobId.of(pathBase, email);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-        storage.create(blobInfo, file.getBytes());
+        String path = pathBase + "docs/" + email +".jpeg";
+        WritableResource newResource = (WritableResource) context.getResource(path);
+        try {
+            OutputStream output = newResource.getOutputStream();
+            InputStream input = file.getInputStream();
+            output.write(input.read());
+            input.close();
+            output.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return ResponseEntity.ok(true);
     }
 
-    @GetMapping("/tutorialcreationuploadimagemultimedia/{name}")
+    @PostMapping("/tutorialcreationuploadimagemultimedia/{name}")
     public ResponseEntity<Boolean> uploadImage(@RequestParam("image") MultipartFile file, @PathVariable String name)
     {
-        Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
-        BlobId blobId = BlobId.of(pathBase, name);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+        String path = pathBase + "images/" + name + ".jpeg";
+        WritableResource newResource = (WritableResource) context.getResource(path);
         try {
-            storage.create(blobInfo, file.getBytes());
-            return ResponseEntity.ok(true);
+            OutputStream output = newResource.getOutputStream();
+            InputStream input = file.getInputStream();
+            output.write(input.read());
+            input.close();
+            output.close();
         } catch (IOException e) {
             e.printStackTrace();
-            return ResponseEntity.ok(false);
         }
+        return ResponseEntity.ok(true);
     }
 
     @GetMapping("/files/images/{filename}")
@@ -502,22 +534,22 @@ public class UrlRestController
         return header;
     }
 
-    @PostMapping(path = "/create/tutorial", consumes = MediaType.APPLICATION_JSON_VALUE,
+    @PostMapping(path = "/create/tutorial/{email}", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Tutorial> insertTutorial(@PathVariable String email, @RequestBody Tutorial tutorial)
     {
-        if(email==null || email.isEmpty() || jdbcTemplate.query("SELECT * FROM helper WHERE helper_email = " + email
+        Helper helper = jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_email = " + email
                         .replace("xyz121", ".").replace("xyz122", "@"),
-                new HelperFullMapper()).isEmpty() || queryUsersTutorial(tutorial)==null) {
-            return null;
-        }
-        jdbcTemplate.execute("INSERT INTO tutorials VALUES(default, " + tutorial.getTutorialName() +
-                ", " + tutorial.getAuthorId() + ", " + tutorial.getMiniatureName() + ", 0, 'f';");
-        try {
-            return ResponseEntity.ok(queryUsersTutorial(tutorial));
-        } catch (DataAccessException e) {
-            return null;
-        }
+                new HelperFullMapper());
+        if(helper!=null) {
+            jdbcTemplate.execute("INSERT INTO tutorials VALUES(default, " + tutorial.getTutorialName() +
+                    ", " + helper.getHelperId() + ", " + tutorial.getMiniatureName() + ", 0, 'f';");
+            try {
+                return ResponseEntity.ok(queryUsersTutorial(tutorial));
+            } catch (DataAccessException e) {
+                return null;
+            }
+        } else return null;
     }
 
     @GetMapping(path = "/help/{email}/{help}")
