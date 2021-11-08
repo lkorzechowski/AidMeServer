@@ -176,7 +176,7 @@ public class UrlRestController
     public ResponseEntity<List<Tutorial>> tutorials()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial WHERE approved = t",
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial WHERE approved = 'true'",
                     new TutorialRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
