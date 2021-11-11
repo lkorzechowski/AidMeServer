@@ -9,10 +9,10 @@ import org.springframework.cloud.gcp.autoconfigure.core.GcpContextAutoConfigurat
 @SpringBootApplication
 @EnableAutoConfiguration
 @AutoConfigureAfter(GcpContextAutoConfiguration.class)
-public class AidMeApplication
+public class SaveMeApplication
 {
 	public static void main(String[] args)
 	{
-		SpringApplication.run(AidMeApplication.class, args);
+		SpringApplication.run(SaveMeApplication.class, args);
 	}
 }

@@ -10,8 +10,8 @@
 		<relativePath/>
 	</parent>
 	<groupId>com.orzechowski</groupId>
-	<artifactId>aidme</artifactId>
-	<name>AidMe</name>
+	<artifactId>saveme</artifactId>
+	<name>SaveMe</name>
 	<dependencies>
 		<dependency>
 			<groupId>com.google.cloud</groupId>
@@ -70,7 +70,7 @@
 					<configuration>
 						<archive>
 							<manifest>
-								<mainClass>com.orzechowski.aidme.AidMeApplication</mainClass>
+								<mainClass>com.orzechowski.aidme.SaveMeApplication</mainClass>
 							</manifest>
 						</archive>
 						<descriptorRefs>
@@ -92,7 +92,7 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
-					<mainClass>com.orzechowski.aidme.AidMeApplication</mainClass>
+					<mainClass>com.orzechowski.aidme.SaveMeApplication</mainClass>
 				</configuration>
 				<executions>
 					<execution>

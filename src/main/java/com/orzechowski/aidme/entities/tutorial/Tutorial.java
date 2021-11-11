@@ -17,7 +17,7 @@ public class Tutorial
     @Column(name = "author_id", nullable = false)
     private long authorId;
     @Column(name = "tutorial_miniature_file", nullable = false)
-    private String miniatureName;
+    private String miniatureString;
     @Column(name = "tutorial_rating", nullable = false)
     private float rating;
 
@@ -26,7 +26,7 @@ public class Tutorial
         this.tutorialId = tutorialId;
         this.tutorialName = tutorialName;
         this.authorId = authorId;
-        this.miniatureName = miniatureName;
+        this.miniatureString = miniatureName;
         this.rating = rating;
     }
 
@@ -45,9 +45,9 @@ public class Tutorial
         return authorId;
     }
 
-    public String getMiniatureName()
+    public String getMiniatureString()
     {
-        return miniatureName;
+        return miniatureString;
     }
 
     public float getRating()

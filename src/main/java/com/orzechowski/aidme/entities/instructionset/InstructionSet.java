@@ -23,7 +23,7 @@ public class InstructionSet
     @Column(name = "instruction_position", nullable = false)
     private int position;
     @Column(name = "instruction_narration_file")
-    private String narrationName;
+    private String narrationFile;
 
     public InstructionSet(long instructionSetId, String title, String instructions, int time, long tutorialId,
                           int position, String narrationName)
@@ -34,7 +34,7 @@ public class InstructionSet
         this.time = time;
         this.tutorialId = tutorialId;
         this.position = position;
-        this.narrationName = narrationName;
+        this.narrationFile = narrationName;
     }
 
     public long getInstructionSetId()
@@ -67,8 +67,8 @@ public class InstructionSet
         return position;
     }
 
-    public String getNarrationName()
+    public String getNarrationFile()
     {
-        return narrationName;
+        return narrationFile;
     }
 }

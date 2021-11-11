@@ -37,23 +37,15 @@ import com.orzechowski.aidme.entities.versionmultimedia.VersionMultimedia;
 import com.orzechowski.aidme.entities.versionmultimedia.VersionMultimediaRowMapper;
 import com.orzechowski.aidme.entities.versionsound.VersionSound;
 import com.orzechowski.aidme.entities.versionsound.VersionSoundRowMapper;
-import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.WritableResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import java.io.*;
 import java.util.LinkedList;
@@ -61,48 +53,29 @@ import java.util.List;
 import java.util.Objects;
 
 @RestController
-public class UrlRestController
+public class GetRestController
 {
-    //szyfrowanie znakow w linii zapytania
-    //xyz121 = .
-    //xyz122 = @
-
-    @Bean
-    public MultipartResolver multipartResolver()
-    {
-        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
-        multipartResolver.setMaxUploadSize(10000000);
-        return multipartResolver;
-    }
-
-    @Bean
-    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> tomcatCustomizer()
-    {
-        return (tomcat) -> tomcat.addConnectorCustomizers((connector) -> {
-            if (connector.getProtocolHandler() instanceof AbstractHttp11Protocol) {
-                AbstractHttp11Protocol<?> protocolHandler = (AbstractHttp11Protocol<?>) connector.getProtocolHandler();
-                protocolHandler.setDisableUploadTimeout(true);
-                protocolHandler.setConnectionUploadTimeout(60000);
-            }
-        });
-    }
-
     @Autowired
     private final JdbcTemplate jdbcTemplate;
+    @Autowired
     private final ApplicationContext context;
     private final static String pathBase = "gs://aidme/";
     private final List<Helper> occupiedHelpers = new LinkedList<>();
+    private final Decoder decoder = new Decoder();
 
-    public UrlRestController(JdbcTemplate jdbcTemplate, ApplicationContext context)
+    public GetRestController(JdbcTemplate jdbcTemplate, ApplicationContext context)
     {
         this.jdbcTemplate = jdbcTemplate;
         this.context = context;
+        Helper admin = jdbcTemplate.queryForObject("SELECT * FROM helpers WHERE profession = 'admin'",
+                new HelperFullMapper());
+        occupiedHelpers.add(admin);
     }
 
     @GetMapping("/login/{email}")
     public ResponseEntity<Login> login(@PathVariable String email)
     {
-        email = email.replace("xyz121", ".").replace("xyz122", "@");
+        email = decoder.decodeEmail(email);
         Login loginResponse = jdbcTemplate.queryForObject("SELECT verified, helping FROM helper " +
                 "WHERE helper_email = '" + email + "'", new HelperLoginMapper());
         if(loginResponse!=null) {
@@ -119,32 +92,11 @@ public class UrlRestController
     {
         try {
             return ResponseEntity.ok(jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_email = '" +
-                    email.replace("xyz121", ".").replace("xyz122", "@") + "'",
-                    new HelperFullMapper()));
+                    decoder.decodeEmail(email) + "'", new HelperFullMapper()));
         } catch(DataAccessException e) {
             e.printStackTrace();
             return null;
         }
-    }
-
-    @GetMapping("/setfullhelperdetailforemail/{email}/{id}/{name}/{surname}/{title}/{profession}/{phone}")
-    public ResponseEntity<Boolean> uploadDetail(@PathVariable String email, @PathVariable String id,
-                                                @PathVariable String name, @PathVariable String surname,
-                                                @PathVariable String title, @PathVariable String profession,
-                                                @PathVariable String phone)
-    {
-        String query = "UPDATE helper SET helper_name = '" + name + "', helper_surname = '" + surname + "'";
-        if(!Objects.equals(title, "null")) {
-            query = query + ", helper_title = '" + title + "'";
-        }
-        if(!Objects.equals(profession, "null")) {
-            query = query + ", helper_profession = '" + profession + "'";
-        }
-        if(!Objects.equals(phone, "null")) {
-            query = query + ", helper_phone = '" + phone + "'";
-        }
-        jdbcTemplate.execute(query + " WHERE helper_id = " + id + " AND helper_email = '" + email + "'");
-        return ResponseEntity.ok(true);
     }
 
     @GetMapping("/helperlist")
@@ -409,8 +361,8 @@ public class UrlRestController
     {
         try {
             Document doc = jdbcTemplate.queryForObject("SELECT d.* FROM document d JOIN helper h ON d.helper_id = "
-                            + "h.helper_id WHERE h.helper_email = '" + email.replace("xyz121", ".")
-                            .replace("xyz122", "@") + "'", new DocumentRowMapper());
+                            + "h.helper_id WHERE h.helper_email = '" + decoder.decodeEmail(email) + "'",
+                    new DocumentRowMapper());
             if(doc!=null) {
                 return ResponseEntity.ok(doc);
             } else {
@@ -420,40 +372,6 @@ public class UrlRestController
             e.printStackTrace();
             return null;
         }
-    }
-
-    @PostMapping("/userdocumentuploadimage/{email}")
-    public ResponseEntity<Boolean> uploadDocument(@RequestParam MultipartFile file, @PathVariable String email)
-    {
-        String path = pathBase + "docs/" + email +".jpeg";
-        WritableResource newResource = (WritableResource) context.getResource(path);
-        try {
-            OutputStream output = newResource.getOutputStream();
-            InputStream input = file.getInputStream();
-            output.write(input.read());
-            input.close();
-            output.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return ResponseEntity.ok(true);
-    }
-
-    @PostMapping("/tutorialcreationuploadimagemultimedia/{name}")
-    public ResponseEntity<Boolean> uploadImage(@RequestParam("image") MultipartFile file, @PathVariable String name)
-    {
-        String path = pathBase + "images/" + name + ".jpeg";
-        WritableResource newResource = (WritableResource) context.getResource(path);
-        try {
-            OutputStream output = newResource.getOutputStream();
-            InputStream input = file.getInputStream();
-            output.write(input.read());
-            input.close();
-            output.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return ResponseEntity.ok(true);
     }
 
     @GetMapping("/files/images/{filename}")
@@ -524,38 +442,10 @@ public class UrlRestController
         }
     }
 
-    private HttpHeaders makeHeader(String filename)
-    {
-        HttpHeaders header = new HttpHeaders();
-        header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+filename);
-        header.add("Cache-Control", "no-cache, no-store, must-revalidate");
-        header.add("Pragma", "no-cache");
-        header.add("Expires", "0");
-        return header;
-    }
-
-    @PostMapping(path = "/create/tutorial/{email}", consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Tutorial> insertTutorial(@PathVariable String email, @RequestBody Tutorial tutorial)
-    {
-        Helper helper = jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_email = " + email
-                        .replace("xyz121", ".").replace("xyz122", "@"),
-                new HelperFullMapper());
-        if(helper!=null) {
-            jdbcTemplate.execute("INSERT INTO tutorials VALUES(default, " + tutorial.getTutorialName() +
-                    ", " + helper.getHelperId() + ", " + tutorial.getMiniatureName() + ", 0, 'f';");
-            try {
-                return ResponseEntity.ok(queryUsersTutorial(tutorial));
-            } catch (DataAccessException e) {
-                return null;
-            }
-        } else return null;
-    }
-
-    @GetMapping(path = "/help/{email}/{help}")
+    @GetMapping("/help/{email}/{help}")
     public ResponseEntity<Helping> toggleHelp(@PathVariable String email, @PathVariable String help)
     {
-        email = email.replace("xyz121", ".").replace("xyz122", "@");
+        email = decoder.decodeEmail(email);
         if(Objects.equals(help, "t")) {
             this.jdbcTemplate.execute("UPDATE helper SET helping = 't' WHERE helper_email = '" + email + "'");
             return ResponseEntity.ok(new Helping(true));
@@ -565,10 +455,42 @@ public class UrlRestController
         }
     }
 
-    private Tutorial queryUsersTutorial(Tutorial tutorial)
+    @GetMapping("/phonenumber/{tagId}")
+    public ResponseEntity<Helper> requestPhoneNumber(@PathVariable Long tagId)
     {
-        return jdbcTemplate.queryForObject("SELECT * FROM tutorials WHERE tutorial_name = '" +
-                        tutorial.getTutorialName() + "' AND author_id = '" + tutorial.getAuthorId() + "'",
-                new TutorialRowMapper());
+        try {
+            List<Helper> helpers = jdbcTemplate.query("SELECT * FROM helper h JOIN helper_tag ht ON h.helper_id =" +
+                    "ht.helper_id WHERE h.helping = 'true' AND ht.tag_id = " + tagId, new HelperFullMapper());
+            helpers.removeIf(occupiedHelpers::contains);
+            if(!helpers.isEmpty()) {
+                Helper chosen = helpers.get(0);
+                occupiedHelpers.add(chosen);
+                return ResponseEntity.ok(chosen);
+            } else return null;
+        } catch (DataAccessException e) {
+            return null;
+        }
+    }
+
+    @GetMapping("/callended/{email}")
+    public ResponseEntity<Boolean> removeFromOccupied(@PathVariable String email)
+    {
+        try {
+            occupiedHelpers.remove(jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_email = " +
+                            decoder.decodeEmail(email), new HelperFullMapper()));
+            return ResponseEntity.ok(true);
+        } catch (DataAccessException e) {
+            return null;
+        }
+    }
+
+    private HttpHeaders makeHeader(String filename)
+    {
+        HttpHeaders header = new HttpHeaders();
+        header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+filename);
+        header.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        header.add("Pragma", "no-cache");
+        header.add("Expires", "0");
+        return header;
     }
 }
