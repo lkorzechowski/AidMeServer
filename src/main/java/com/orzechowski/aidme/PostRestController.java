@@ -14,12 +14,8 @@ import com.orzechowski.aidme.entities.tutorialtag.TutorialTag;
 import com.orzechowski.aidme.entities.version.Version;
 import com.orzechowski.aidme.entities.versioninstruction.VersionInstruction;
 import com.orzechowski.aidme.entities.versionmultimedia.VersionMultimedia;
-import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.WritableResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.MediaType;
@@ -27,8 +23,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,26 +33,6 @@ import java.util.Objects;
 @RestController
 public class PostRestController
 {
-    @Bean
-    public MultipartResolver multipartResolver()
-    {
-        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
-        multipartResolver.setMaxUploadSize(10000000);
-        return multipartResolver;
-    }
-
-    @Bean
-    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> tomcatCustomizer()
-    {
-        return (tomcat) -> tomcat.addConnectorCustomizers((connector) -> {
-            if (connector.getProtocolHandler() instanceof AbstractHttp11Protocol) {
-                AbstractHttp11Protocol<?> protocolHandler = (AbstractHttp11Protocol<?>) connector.getProtocolHandler();
-                protocolHandler.setDisableUploadTimeout(true);
-                protocolHandler.setConnectionUploadTimeout(60000);
-            }
-        });
-    }
-
     @Autowired
     private final JdbcTemplate jdbcTemplate;
     @Autowired
@@ -72,6 +46,29 @@ public class PostRestController
         this.context = context;
     }
 
+    //email pozostaje zakodowany aby uniknac podwojnej kropki
+    @PostMapping("/userdocumentuploadimage/{email}")
+    public String uploadDocument(@RequestParam("file") MultipartFile file, @PathVariable String email)
+    {
+        String path = pathBase + "docs/" + email + ".jpeg";
+        WritableResource newResource = (WritableResource) context.getResource(path);
+        try {
+            OutputStream output = newResource.getOutputStream();
+            output.write(file.getBytes());
+            output.close();
+            return "ok";
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "bad request";
+        }
+    }
+
+    @PostMapping("/userdocumentuploadinfo/{email}")
+    public ResponseEntity<Boolean> uploadInfo(@RequestBody String data)
+    {
+        return ResponseEntity.ok(true);
+    }
+
     @PostMapping(path = "/create/tutorial/{email}", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Tutorial> createTutorial(@PathVariable String email, @RequestBody Tutorial tutorial)
@@ -81,7 +78,7 @@ public class PostRestController
         if(helper!=null) {
             try {
                 jdbcTemplate.execute("INSERT INTO tutorial VALUES(default, '" + tutorial.getTutorialName() +
-                        "', " + helper.getHelperId() + ", '" + tutorial.getMiniatureString() + "', 0, 'f';");
+                        "', " + helper.getHelperId() + ", '" + tutorial.getMiniatureName() + "', 0, 'f';");
                 return ResponseEntity.ok(queryUsersTutorial(tutorial));
             } catch (DataAccessException e) {
                 return null;
@@ -249,7 +246,10 @@ public class PostRestController
         try {
             OutputStream output = newResource.getOutputStream();
             InputStream input = file.getInputStream();
-            output.write(input.read());
+            byte[] buf = new byte[8192];
+            while(input.read(buf) > 0) {
+                output.write(input.read());
+            }
             input.close();
             output.close();
             return ResponseEntity.ok(true);
@@ -283,26 +283,6 @@ public class PostRestController
                                                @PathVariable String extension)
     {
         String path = pathBase + "sounds/" + name + "." + extension;
-        WritableResource newResource = (WritableResource) context.getResource(path);
-        try {
-            OutputStream output = newResource.getOutputStream();
-            InputStream input = file.getInputStream();
-            output.write(input.read());
-            input.close();
-            output.close();
-            return ResponseEntity.ok(true);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    //email pozostaje zakodowany aby uniknac podwojnej kropki
-    @PostMapping(path = "/userdocumentuploadimage/{email}/{extension}", headers = "content-type=multipart/*")
-    public ResponseEntity<Boolean> uploadDocument(@RequestParam MultipartFile file, @PathVariable String email,
-                                                  @PathVariable String extension)
-    {
-        String path = pathBase + "docs/" + email + "." + extension;
         WritableResource newResource = (WritableResource) context.getResource(path);
         try {
             OutputStream output = newResource.getOutputStream();

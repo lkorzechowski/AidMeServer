@@ -47,6 +47,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Nullable;
 import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,7 +68,7 @@ public class GetRestController
     {
         this.jdbcTemplate = jdbcTemplate;
         this.context = context;
-        Helper admin = jdbcTemplate.queryForObject("SELECT * FROM helpers WHERE profession = 'admin'",
+        Helper admin = jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_profession = 'admin'",
                 new HelperFullMapper());
         occupiedHelpers.add(admin);
     }
@@ -115,7 +116,7 @@ public class GetRestController
     public ResponseEntity<Helper> helperNumber(@PathVariable long id)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForObject("SELECT h.* FROM helpers h" +
+            return ResponseEntity.ok(jdbcTemplate.queryForObject("SELECT h.* FROM helper h" +
                             "JOIN helper_tags ht ON h.helper_id = ht.helper_id " +
                             "JOIN tags t ON ht.tag_id = t.tag_id WHERE t.tag_id = " + id, new HelperFullMapper()));
         } catch (DataAccessException e) {
@@ -360,16 +361,15 @@ public class GetRestController
     public ResponseEntity<Document> checkDocument(@PathVariable String email)
     {
         try {
-            Document doc = jdbcTemplate.queryForObject("SELECT d.* FROM document d JOIN helper h ON d.helper_id = "
-                            + "h.helper_id WHERE h.helper_email = '" + decoder.decodeEmail(email) + "'",
+            @Nullable Document doc = jdbcTemplate.queryForObject("SELECT d.* FROM document d JOIN helper h ON " +
+                            "d.helper_id = h.helper_id WHERE h.helper_email = '" + decoder.decodeEmail(email) + "'",
                     new DocumentRowMapper());
             if(doc!=null) {
                 return ResponseEntity.ok(doc);
             } else {
                 return ResponseEntity.ok(null);
             }
-        } catch (DataAccessException e) {
-            e.printStackTrace();
+        } catch (DataAccessException ignored) {
             return null;
         }
     }
