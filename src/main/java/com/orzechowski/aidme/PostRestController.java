@@ -1,25 +1,31 @@
 package com.orzechowski.aidme;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.orzechowski.aidme.entities.document.DocumentRowMapper;
 import com.orzechowski.aidme.entities.helper.Helper;
 import com.orzechowski.aidme.entities.helper.HelperFullMapper;
 import com.orzechowski.aidme.entities.instructionset.InstructionSet;
 import com.orzechowski.aidme.entities.keyword.Keyword;
 import com.orzechowski.aidme.entities.keyword.KeywordRowMapper;
+import com.orzechowski.aidme.entities.multimedia.Multimedia;
+import com.orzechowski.aidme.entities.multimedia.MultimediaRowMapper;
 import com.orzechowski.aidme.entities.tag.Tag;
 import com.orzechowski.aidme.entities.tag.TagRowMapper;
 import com.orzechowski.aidme.entities.tutorial.Tutorial;
 import com.orzechowski.aidme.entities.tutorial.TutorialRowMapper;
 import com.orzechowski.aidme.entities.tutoriallink.TutorialLink;
+import com.orzechowski.aidme.entities.tutorialsound.TutorialSound;
+import com.orzechowski.aidme.entities.tutorialsound.TutorialSoundRowMapper;
 import com.orzechowski.aidme.entities.tutorialtag.TutorialTag;
 import com.orzechowski.aidme.entities.version.Version;
+import com.orzechowski.aidme.entities.version.VersionRowMapper;
 import com.orzechowski.aidme.entities.versioninstruction.VersionInstruction;
 import com.orzechowski.aidme.entities.versionmultimedia.VersionMultimedia;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.WritableResource;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,6 +46,7 @@ public class PostRestController
     private final ApplicationContext context;
     private final static String pathBase = "gs://aidme/";
     private final Decoder decoder = new Decoder();
+    private final Gson gson = new Gson();
 
     public PostRestController(JdbcTemplate jdbcTemplate, ApplicationContext context)
     {
@@ -63,7 +71,7 @@ public class PostRestController
         }
     }
 
-    @PostMapping(path = "/upload/image/{name}")
+    @PostMapping("/upload/image/{name}")
     public String uploadImage(@RequestParam("file") MultipartFile file, @PathVariable String name)
     {
         String path = pathBase + "images/" + name + ".jpeg";
@@ -79,7 +87,7 @@ public class PostRestController
         }
     }
 
-    @PostMapping(path = "/upload/narration/{name}")
+    @PostMapping("/upload/narration/{name}")
     public String uploadNarration(@RequestParam("file") MultipartFile file, @PathVariable String name)
     {
         String path = pathBase + "narrations/" + name + ".mp3";
@@ -95,7 +103,7 @@ public class PostRestController
         }
     }
 
-    @PostMapping(path = "/upload/video/{name}/{extension}")
+    @PostMapping("/upload/video/{name}")
     public String uploadVideo(@RequestParam("file") MultipartFile file, @PathVariable String name)
     {
         String path = pathBase + "vids/" + name + ".mp4";
@@ -111,7 +119,7 @@ public class PostRestController
         }
     }
 
-    @PostMapping(path = "/upload/sound/{name}/{extension}")
+    @PostMapping("/upload/sound/{name}")
     public String uploadSound(@RequestParam("file") MultipartFile file, @PathVariable String name)
     {
         String path = pathBase + "sounds/" + name + ".mp3";
@@ -127,7 +135,7 @@ public class PostRestController
         }
     }
 
-    @PostMapping(path = "/userdocumentuploadinfo/{email}")
+    @PostMapping("/userdocumentuploadinfo/{email}")
     public ResponseEntity<String> uploadInfo(@PathVariable("email") String email, @RequestBody String description)
     {
         try {
@@ -145,17 +153,19 @@ public class PostRestController
         }
     }
 
-    @PostMapping(path = "/create/tutorial/{email}", consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Tutorial> createTutorial(@PathVariable String email, @RequestBody Tutorial tutorial)
+    @PostMapping("/create/tutorial/{email}")
+    public String createTutorial(@PathVariable String email, @RequestBody String request)
     {
-        Helper helper = jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_email = " +
-                        decoder.decodeEmail(email), new HelperFullMapper());
+        Tutorial tutorial = gson.fromJson(request, Tutorial.class);
+        Helper helper = jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_email = '" +
+                        decoder.decodeEmail(email) + "'", new HelperFullMapper());
         if(helper!=null) {
             try {
-                jdbcTemplate.execute("INSERT INTO tutorial VALUES(default, '" + tutorial.getTutorialName() +
-                        "', " + helper.getHelperId() + ", '" + tutorial.getMiniatureName() + "', 0, 'f';");
-                return ResponseEntity.ok(queryUsersTutorial(tutorial));
+                jdbcTemplate.execute("INSERT INTO tutorial VALUES(default, '" + tutorial.getTutorialName() + "', " +
+                        helper.getHelperId() + ", '" + tutorial.getMiniatureName() + "', 0, 'f';");
+                return String.valueOf(Objects.requireNonNull(jdbcTemplate.queryForObject("SELECT * FROM " +
+                                "tutorials WHERE tutorial_name = '" + tutorial.getTutorialName() + "' AND author_id = " +
+                                helper.getHelperId(), new TutorialRowMapper())).getTutorialId());
             } catch (DataAccessException e) {
                 e.printStackTrace();
                 return null;
@@ -163,10 +173,11 @@ public class PostRestController
         } else return null;
     }
 
-    @PostMapping(path = "/create/instructions", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> createInstructions(@RequestBody List<InstructionSet> instructions)
+    @PostMapping("/create/instructions")
+    public String createInstructions(@RequestBody String request)
     {
-        if(instructions!=null && !instructions.isEmpty()) {
+        List<InstructionSet> instructions = gson.fromJson(request, new TypeToken<ArrayList<InstructionSet>>(){}
+                .getType());
             try {
                 for(InstructionSet instruction : instructions) {
                     jdbcTemplate.execute("INSERT INTO instruction_set VALUES(default, '" + instruction.getTitle() +
@@ -174,17 +185,17 @@ public class PostRestController
                             instruction.getTutorialId() + ", " + instruction.getPosition() + ", '" +
                             instruction.getNarrationFile() + "')");
                 }
-                return ResponseEntity.ok(true);
+                return "ok";
             } catch (DataAccessException e) {
                 e.printStackTrace();
                 return null;
             }
-        } else return null;
     }
 
-    @PostMapping(path = "/create/versions", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> createVersions(@RequestBody List<Version> versions)
+    @PostMapping("/create/versions")
+    public String createVersions(@RequestBody String request)
     {
+        List<Version> versions = gson.fromJson(request, new TypeToken<ArrayList<Version>>(){}.getType());
         if(versions!=null && !versions.isEmpty()) {
             try {
                 for(Version version : versions) {
@@ -193,7 +204,8 @@ public class PostRestController
                             version.isHasChildren() + "', '" + version.isHasParent() + "', " +
                             version.getParentVersionId() + ")");
                 }
-                return ResponseEntity.ok(true);
+                return gson.toJson(jdbcTemplate.query("SELECT * FROM version WHERE tutorial_id = " +
+                        versions.get(0).getTutorialId(), new VersionRowMapper()));
             } catch (DataAccessException e) {
                 e.printStackTrace();
                 return null;
@@ -201,9 +213,51 @@ public class PostRestController
         } else return null;
     }
 
-    @PostMapping(path = "/create/versioninstructions", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> createVersionInstructions(@RequestBody List<VersionInstruction> versionInstructions)
+    @PostMapping("/create/multimedia")
+    public String createMultimedia(@RequestBody String request)
     {
+        List<Multimedia> multimedia = gson.fromJson(request, new TypeToken<ArrayList<Multimedia>>(){}.getType());
+        if(multimedia!=null && !multimedia.isEmpty()) {
+            try {
+                for(Multimedia multi : multimedia) {
+                    jdbcTemplate.execute("INSERT INTO multimedia VALUES(default, " + multi.getTutorialId() +
+                            ", " + multi.getDisplayTime() + ", '" + multi.isType() + "', '" + multi.getFileName() +
+                            "', '" + multi.isLoop() + "', " + multi.getPosition() + ")");
+                }
+                return gson.toJson(jdbcTemplate.query("SELECT * FROM multimedia WHERE tutorial_id = " +
+                        multimedia.get(0).getTutorialId(), new MultimediaRowMapper()));
+            } catch (DataAccessException e) {
+                e.printStackTrace();
+                return null;
+            }
+        } else return null;
+    }
+
+    @PostMapping("/create/sounds")
+    public String createSounds(@RequestBody String request)
+    {
+        List<TutorialSound> sounds = gson.fromJson(request, new TypeToken<ArrayList<TutorialSound>>(){}.getType());
+        if(sounds!=null && !sounds.isEmpty()) {
+            try {
+                for(TutorialSound sound: sounds) {
+                    jdbcTemplate.execute("INSERT INTO tutorial_sound VALUES(default, " + sound.getSoundStart() +
+                            ", '" + sound.isSoundLoop() + "', " + sound.getInterval() + ", " + sound.getTutorialId() +
+                            ", '" + sound.getFileName() + "')");
+                }
+                return gson.toJson(jdbcTemplate.query("SELECT * FROM tutorial_sound WHERE sound_id = " +
+                        sounds.get(0).getTutorialId(), new TutorialSoundRowMapper()));
+            } catch (DataAccessException e) {
+                e.printStackTrace();
+                return null;
+            }
+        } else return null;
+    }
+
+    @PostMapping("/create/versioninstructions")
+    public String createVersionInstructions(@RequestBody String request)
+    {
+        List<VersionInstruction> versionInstructions = gson.fromJson(request,
+                new TypeToken<ArrayList<VersionInstruction>>(){}.getType());
         if(versionInstructions!=null && !versionInstructions.isEmpty()) {
             try {
                 for(VersionInstruction versionInstruction : versionInstructions) {
@@ -211,7 +265,7 @@ public class PostRestController
                             versionInstruction.getVersionId() + ", " + versionInstruction.getInstructionPosition() +
                             ")");
                 }
-                return ResponseEntity.ok(true);
+                return "ok";
             } catch (DataAccessException e) {
                 e.printStackTrace();
                 return null;
@@ -219,9 +273,10 @@ public class PostRestController
         } else return null;
     }
 
-    @PostMapping(path = "/create/tutoriallinks", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> createTutorialLinks(@RequestBody List<TutorialLink> tutorialLinks)
+    @PostMapping("/create/tutoriallinks")
+    public String createTutorialLinks(@RequestBody String request)
     {
+        List<TutorialLink> tutorialLinks = gson.fromJson(request, new TypeToken<ArrayList<TutorialLink>>(){}.getType());
         if(tutorialLinks!=null && !tutorialLinks.isEmpty()) {
             try {
                 for(TutorialLink tutorialLink : tutorialLinks) {
@@ -229,7 +284,7 @@ public class PostRestController
                             tutorialLink.getTutorialId() + ", " + tutorialLink.getOriginId() + ", " +
                             tutorialLink.getInstructionNumber() + ")");
                 }
-                return ResponseEntity.ok(true);
+                return "ok";
             } catch (DataAccessException e) {
                 e.printStackTrace();
                 return null;
@@ -237,10 +292,10 @@ public class PostRestController
         } else return null;
     }
 
-    @PostMapping(path = "/create/tutorialtags/{name}/{level}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> createTutorialTags(@RequestBody List<TutorialTag> tutorialTags,
-                                                      @PathVariable String name, @PathVariable int level)
+    @PostMapping("/create/tutorialtags/{name}/{level}")
+    public String createTutorialTags(@RequestBody String request, @PathVariable String name, @PathVariable int level)
     {
+        List<TutorialTag> tutorialTags = gson.fromJson(request, new TypeToken<ArrayList<TutorialTag>>(){}.getType());
         if(tutorialTags!=null && !tutorialTags.isEmpty()) {
             try {
                 jdbcTemplate.execute("INSERT INTO tag VALUES(default, " + name + ", " + level + ")");
@@ -253,7 +308,7 @@ public class PostRestController
                     }
                     jdbcTemplate.execute("INSERT INTO tutorial_tag VALUES(default, " + tutorialTags.get(0)
                             .getTutorialId() + ", " + tag.getTagId() + ")");
-                    return ResponseEntity.ok(true);
+                    return "ok";
                 } else return null;
             } catch (DataAccessException e) {
                 e.printStackTrace();
@@ -262,16 +317,18 @@ public class PostRestController
         } else return null;
     }
 
-    @PostMapping(path = "/create/versionmultimedia", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> createVersionMultimedia(@RequestBody List<VersionMultimedia> versionMultimedia)
+    @PostMapping("/create/versionmultimedia")
+    public String createVersionMultimedia(@RequestBody String request)
     {
+        List<VersionMultimedia> versionMultimedia = gson.fromJson(request,
+                new TypeToken<ArrayList<VersionMultimedia>>(){}.getType());
         if(versionMultimedia!=null && !versionMultimedia.isEmpty()) {
             try {
                 for(VersionMultimedia vM: versionMultimedia) {
                     jdbcTemplate.execute("INSERT INTO version_multimedia VALUES(default, " + vM.getMultimediaId() +
                             ", " + vM.getVersionId() + ")");
                 }
-                return ResponseEntity.ok(true);
+                return "ok";
             } catch (DataAccessException e) {
                 e.printStackTrace();
                 return null;
@@ -279,9 +336,10 @@ public class PostRestController
         } else return null;
     }
 
-    @PostMapping(path = "/create/keywords/{uniqueId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> createKeywords(@RequestBody List<Keyword> keywords, @PathVariable Long uniqueId)
+    @PostMapping("/create/keywords/{uniqueId}")
+    public String createKeywords(@RequestBody String request, @PathVariable Long uniqueId)
     {
+        List<Keyword> keywords = gson.fromJson(request, new TypeToken<ArrayList<Keyword>>(){}.getType());
         if(keywords!=null && !keywords.isEmpty()) {
             try {
                 for(Keyword keyword: keywords) {
@@ -294,7 +352,7 @@ public class PostRestController
                                 insert.getKeywordId() + ")");
                     }
                 }
-                return ResponseEntity.ok(true);
+                return "ok";
             } catch (DataAccessException e) {
                 e.printStackTrace();
                 return null;
@@ -325,13 +383,5 @@ public class PostRestController
             e.printStackTrace();
             return null;
         }
-    }
-
-
-    private Tutorial queryUsersTutorial(Tutorial tutorial)
-    {
-        return jdbcTemplate.queryForObject("SELECT * FROM tutorials WHERE tutorial_name = '" +
-                        tutorial.getTutorialName() + "' AND author_id = '" + tutorial.getAuthorId() + "'",
-                new TutorialRowMapper());
     }
 }

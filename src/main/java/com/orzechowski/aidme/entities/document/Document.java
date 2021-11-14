@@ -1,7 +1,5 @@
 package com.orzechowski.aidme.entities.document;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -13,16 +11,12 @@ public class Document
 {
     @Id
     @Column(name = "document_id", nullable = false)
-    @JsonProperty("documentId")
     private long documentId;
     @Column(name = "document_file_name", nullable = false)
-    @JsonProperty("filename")
     private String fileName;
     @Column(name = "document_description")
-    @JsonProperty("description")
     private String description;
     @Column(name = "helper_id", nullable = false)
-    @JsonProperty("helperId")
     private long helperId;
 
     public Document(long documentId, String fileName, String description, long helperId)
