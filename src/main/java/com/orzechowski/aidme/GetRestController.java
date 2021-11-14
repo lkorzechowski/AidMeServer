@@ -6,7 +6,6 @@ import com.orzechowski.aidme.entities.category.Category;
 import com.orzechowski.aidme.entities.category.CategoryRowMapper;
 import com.orzechowski.aidme.entities.categorytag.CategoryTag;
 import com.orzechowski.aidme.entities.categorytag.CategoryTagRowMapper;
-import com.orzechowski.aidme.entities.document.Document;
 import com.orzechowski.aidme.entities.document.DocumentRowMapper;
 import com.orzechowski.aidme.entities.helper.*;
 import com.orzechowski.aidme.entities.helpertag.HelperTag;
@@ -47,7 +46,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Nullable;
 import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
@@ -358,18 +356,17 @@ public class GetRestController
     }
 
     @GetMapping("/documentexists/{email}")
-    public ResponseEntity<Document> checkDocument(@PathVariable String email)
+    public String checkDocument(@PathVariable String email)
     {
         try {
-            @Nullable Document doc = jdbcTemplate.queryForObject("SELECT d.* FROM document d JOIN helper h ON " +
-                            "d.helper_id = h.helper_id WHERE h.helper_email = '" + decoder.decodeEmail(email) + "'",
-                    new DocumentRowMapper());
-            if(doc!=null) {
-                return ResponseEntity.ok(doc);
+            if(!jdbcTemplate.query("SELECT * FROM document WHERE document_file_name = '" + email + "'",
+                    new DocumentRowMapper()).isEmpty()) {
+                return "ok";
             } else {
-                return ResponseEntity.ok(null);
+                return null;
             }
-        } catch (DataAccessException ignored) {
+        } catch (DataAccessException e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -468,6 +465,7 @@ public class GetRestController
                 return ResponseEntity.ok(chosen);
             } else return null;
         } catch (DataAccessException e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -480,6 +478,7 @@ public class GetRestController
                             decoder.decodeEmail(email), new HelperFullMapper()));
             return ResponseEntity.ok(true);
         } catch (DataAccessException e) {
+            e.printStackTrace();
             return null;
         }
     }

@@ -1,5 +1,6 @@
 package com.orzechowski.aidme;
 
+import com.orzechowski.aidme.entities.document.DocumentRowMapper;
 import com.orzechowski.aidme.entities.helper.Helper;
 import com.orzechowski.aidme.entities.helper.HelperFullMapper;
 import com.orzechowski.aidme.entities.instructionset.InstructionSet;
@@ -25,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Objects;
@@ -59,14 +59,90 @@ public class PostRestController
             return "ok";
         } catch (IOException e) {
             e.printStackTrace();
-            return "bad request";
+            return null;
         }
     }
 
-    @PostMapping("/userdocumentuploadinfo/{email}")
-    public ResponseEntity<Boolean> uploadInfo(@RequestBody String data)
+    @PostMapping(path = "/upload/image/{name}")
+    public String uploadImage(@RequestParam("file") MultipartFile file, @PathVariable String name)
     {
-        return ResponseEntity.ok(true);
+        String path = pathBase + "images/" + name + ".jpeg";
+        WritableResource newResource = (WritableResource) context.getResource(path);
+        try {
+            OutputStream output = newResource.getOutputStream();
+            output.write(file.getBytes());
+            output.close();
+            return "ok";
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @PostMapping(path = "/upload/narration/{name}")
+    public String uploadNarration(@RequestParam("file") MultipartFile file, @PathVariable String name)
+    {
+        String path = pathBase + "narrations/" + name + ".mp3";
+        WritableResource newResource = (WritableResource) context.getResource(path);
+        try {
+            OutputStream output = newResource.getOutputStream();
+            output.write(file.getBytes());
+            output.close();
+            return "ok";
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @PostMapping(path = "/upload/video/{name}/{extension}")
+    public String uploadVideo(@RequestParam("file") MultipartFile file, @PathVariable String name)
+    {
+        String path = pathBase + "vids/" + name + ".mp4";
+        WritableResource newResource = (WritableResource) context.getResource(path);
+        try {
+            OutputStream output = newResource.getOutputStream();
+            output.write(file.getBytes());
+            output.close();
+            return "ok";
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @PostMapping(path = "/upload/sound/{name}/{extension}")
+    public String uploadSound(@RequestParam("file") MultipartFile file, @PathVariable String name)
+    {
+        String path = pathBase + "sounds/" + name + ".mp3";
+        WritableResource newResource = (WritableResource) context.getResource(path);
+        try {
+            OutputStream output = newResource.getOutputStream();
+            output.write(file.getBytes());
+            output.close();
+            return "ok";
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @PostMapping(path = "/userdocumentuploadinfo/{email}")
+    public ResponseEntity<String> uploadInfo(@PathVariable("email") String email, @RequestBody String description)
+    {
+        try {
+            Helper helper = jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_email = '" +
+                    decoder.decodeEmail(email) + "'", new HelperFullMapper());
+            assert helper != null;
+            jdbcTemplate.execute("INSERT INTO document VALUES(default, '" + email + "', '" +
+                    description + "', " + helper.getHelperId() + ")");
+            return ResponseEntity.ok(String.valueOf(Objects.requireNonNull(jdbcTemplate.queryForObject(
+                    "SELECT * FROM document WHERE document_file_name = '" + email + "'",
+                    new DocumentRowMapper())).getDocumentId()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @PostMapping(path = "/create/tutorial/{email}", consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -81,6 +157,7 @@ public class PostRestController
                         "', " + helper.getHelperId() + ", '" + tutorial.getMiniatureName() + "', 0, 'f';");
                 return ResponseEntity.ok(queryUsersTutorial(tutorial));
             } catch (DataAccessException e) {
+                e.printStackTrace();
                 return null;
             }
         } else return null;
@@ -99,6 +176,7 @@ public class PostRestController
                 }
                 return ResponseEntity.ok(true);
             } catch (DataAccessException e) {
+                e.printStackTrace();
                 return null;
             }
         } else return null;
@@ -117,6 +195,7 @@ public class PostRestController
                 }
                 return ResponseEntity.ok(true);
             } catch (DataAccessException e) {
+                e.printStackTrace();
                 return null;
             }
         } else return null;
@@ -134,6 +213,7 @@ public class PostRestController
                 }
                 return ResponseEntity.ok(true);
             } catch (DataAccessException e) {
+                e.printStackTrace();
                 return null;
             }
         } else return null;
@@ -151,6 +231,7 @@ public class PostRestController
                 }
                 return ResponseEntity.ok(true);
             } catch (DataAccessException e) {
+                e.printStackTrace();
                 return null;
             }
         } else return null;
@@ -175,6 +256,7 @@ public class PostRestController
                     return ResponseEntity.ok(true);
                 } else return null;
             } catch (DataAccessException e) {
+                e.printStackTrace();
                 return null;
             }
         } else return null;
@@ -191,6 +273,7 @@ public class PostRestController
                 }
                 return ResponseEntity.ok(true);
             } catch (DataAccessException e) {
+                e.printStackTrace();
                 return null;
             }
         } else return null;
@@ -213,88 +296,10 @@ public class PostRestController
                 }
                 return ResponseEntity.ok(true);
             } catch (DataAccessException e) {
+                e.printStackTrace();
                 return null;
             }
         } else return null;
-    }
-
-    @PostMapping(path = "/upload/image/{name}/{extension}", headers = "content-type=multipart/*")
-    public ResponseEntity<Boolean> uploadImage(@RequestParam("file") MultipartFile file, @PathVariable String name,
-                                               @PathVariable String extension)
-    {
-        String path = pathBase + "images/" + name + "." + extension;
-        WritableResource newResource = (WritableResource) context.getResource(path);
-        try {
-            OutputStream output = newResource.getOutputStream();
-            InputStream input = file.getInputStream();
-            output.write(input.read());
-            input.close();
-            output.close();
-            return ResponseEntity.ok(true);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    @PostMapping(path = "/upload/narration/{name}/{extension}", headers = "content-type=multipart/*")
-    public ResponseEntity<Boolean> uploadNarration(@RequestParam("file") MultipartFile file, @PathVariable String name,
-                                                   @PathVariable String extension)
-    {
-        String path = pathBase + "narrations/" + name + "." + extension;
-        WritableResource newResource = (WritableResource) context.getResource(path);
-        try {
-            OutputStream output = newResource.getOutputStream();
-            InputStream input = file.getInputStream();
-            byte[] buf = new byte[8192];
-            while(input.read(buf) > 0) {
-                output.write(input.read());
-            }
-            input.close();
-            output.close();
-            return ResponseEntity.ok(true);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    @PostMapping(path = "/upload/video/{name}/{extension}", headers = "content-type=multipart/*")
-    public ResponseEntity<Boolean> uploadVideo(@RequestParam MultipartFile file, @PathVariable String name,
-                                               @PathVariable String extension)
-    {
-        String path = pathBase + "vids/" + name + "." + extension;
-        WritableResource newResource = (WritableResource) context.getResource(path);
-        try {
-            OutputStream output = newResource.getOutputStream();
-            InputStream input = file.getInputStream();
-            output.write(input.read());
-            input.close();
-            output.close();
-            return ResponseEntity.ok(true);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    @PostMapping(path = "/upload/sound/{name}/{extension}", headers = "content-type=multipart/*")
-    public ResponseEntity<Boolean> uploadSound(@RequestParam MultipartFile file, @PathVariable String name,
-                                               @PathVariable String extension)
-    {
-        String path = pathBase + "sounds/" + name + "." + extension;
-        WritableResource newResource = (WritableResource) context.getResource(path);
-        try {
-            OutputStream output = newResource.getOutputStream();
-            InputStream input = file.getInputStream();
-            output.write(input.read());
-            input.close();
-            output.close();
-            return ResponseEntity.ok(true);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     @PostMapping(path = "/setfullhelperdetailforemail/{email}/{id}/{name}/{surname}/{title}/{profession}/{phone}")
@@ -317,6 +322,7 @@ public class PostRestController
             jdbcTemplate.execute(query + " WHERE helper_id = " + id + " AND helper_email = '" + email + "'");
             return ResponseEntity.ok(true);
         } catch (DataAccessException e) {
+            e.printStackTrace();
             return null;
         }
     }
