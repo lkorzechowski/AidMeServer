@@ -162,9 +162,9 @@ public class PostRestController
         if(helper!=null) {
             try {
                 jdbcTemplate.execute("INSERT INTO tutorial VALUES(default, '" + tutorial.getTutorialName() + "', " +
-                        helper.getHelperId() + ", '" + tutorial.getMiniatureName() + "', 0, 'f'");
+                        helper.getHelperId() + ", '" + tutorial.getMiniatureName() + "', 0, 'f')");
                 return String.valueOf(Objects.requireNonNull(jdbcTemplate.queryForObject("SELECT * FROM " +
-                                "tutorials WHERE tutorial_name = '" + tutorial.getTutorialName() + "' AND author_id = " +
+                                "tutorial WHERE tutorial_name = '" + tutorial.getTutorialName() + "' AND author_id = " +
                                 helper.getHelperId(), new TutorialRowMapper())).getTutorialId());
             } catch (DataAccessException e) {
                 e.printStackTrace();
