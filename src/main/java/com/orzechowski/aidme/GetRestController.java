@@ -61,13 +61,17 @@ public class GetRestController
     private final static String pathBase = "gs://aidme/";
     private final List<Helper> occupiedHelpers = new LinkedList<>();
     private final Decoder decoder = new Decoder();
+    private final HelperFullMapper helperFullMapper = new HelperFullMapper();
+    private final InstructionSetRowMapper instructionSetRowMapper = new InstructionSetRowMapper();
+    private final VersionRowMapper versionRowMapper = new VersionRowMapper();
+    private final TutorialLinkRowMapper tutorialLinkRowMapper = new TutorialLinkRowMapper();
 
     public GetRestController(JdbcTemplate jdbcTemplate, ApplicationContext context)
     {
         this.jdbcTemplate = jdbcTemplate;
         this.context = context;
         Helper admin = jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_profession = 'admin'",
-                new HelperFullMapper());
+                helperFullMapper);
         occupiedHelpers.add(admin);
     }
 
@@ -91,7 +95,7 @@ public class GetRestController
     {
         try {
             return ResponseEntity.ok(jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_email = '" +
-                    decoder.decodeEmail(email) + "'", new HelperFullMapper()));
+                    decoder.decodeEmail(email) + "'", helperFullMapper));
         } catch(DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -116,7 +120,7 @@ public class GetRestController
         try {
             return ResponseEntity.ok(jdbcTemplate.queryForObject("SELECT h.* FROM helper h" +
                             "JOIN helper_tags ht ON h.helper_id = ht.helper_id " +
-                            "JOIN tags t ON ht.tag_id = t.tag_id WHERE t.tag_id = " + id, new HelperFullMapper()));
+                            "JOIN tags t ON ht.tag_id = t.tag_id WHERE t.tag_id = " + id, helperFullMapper));
         } catch (DataAccessException e) {
             e.printStackTrace();
         }
@@ -228,7 +232,7 @@ public class GetRestController
     {
         try {
             return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM instruction_set WHERE tutorial_id = " + id,
-                    new InstructionSetRowMapper()));
+                    instructionSetRowMapper));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -239,8 +243,7 @@ public class GetRestController
     public ResponseEntity<List<InstructionSet>> allInstructions()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM instruction_set",
-                    new InstructionSetRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM instruction_set", instructionSetRowMapper));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -251,7 +254,7 @@ public class GetRestController
     public ResponseEntity<List<Version>> versions()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version", new VersionRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version", versionRowMapper));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -263,7 +266,7 @@ public class GetRestController
     {
         try {
             return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM version WHERE tutorial_id = " + id,
-                    new VersionRowMapper()));
+                    versionRowMapper));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -336,7 +339,7 @@ public class GetRestController
     {
         try {
             return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_link WHERE origin_id = " + id,
-                    new TutorialLinkRowMapper()));
+                    tutorialLinkRowMapper));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -347,8 +350,7 @@ public class GetRestController
     public ResponseEntity<List<TutorialLink>> allTutorialLinks()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_link",
-                    new TutorialLinkRowMapper()));
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial_link", tutorialLinkRowMapper));
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
@@ -457,7 +459,7 @@ public class GetRestController
     {
         try {
             List<Helper> helpers = jdbcTemplate.query("SELECT * FROM helper h JOIN helper_tag ht ON h.helper_id =" +
-                    "ht.helper_id WHERE h.helping = 'true' AND ht.tag_id = " + tagId, new HelperFullMapper());
+                    "ht.helper_id WHERE h.helping = 'true' AND ht.tag_id = " + tagId, helperFullMapper);
             helpers.removeIf(occupiedHelpers::contains);
             if(!helpers.isEmpty()) {
                 Helper chosen = helpers.get(0);
@@ -475,7 +477,7 @@ public class GetRestController
     {
         try {
             occupiedHelpers.remove(jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_email = " +
-                            decoder.decodeEmail(email), new HelperFullMapper()));
+                            decoder.decodeEmail(email), helperFullMapper));
             return ResponseEntity.ok(true);
         } catch (DataAccessException e) {
             e.printStackTrace();

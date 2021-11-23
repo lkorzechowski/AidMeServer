@@ -47,6 +47,8 @@ public class PostRestController
     private final static String pathBase = "gs://aidme/";
     private final Decoder decoder = new Decoder();
     private final Gson gson = new Gson();
+    private final TutorialRowMapper tutorialRowMapper = new TutorialRowMapper();
+    private final HelperFullMapper helperFullMapper = new HelperFullMapper();
 
     public PostRestController(JdbcTemplate jdbcTemplate, ApplicationContext context)
     {
@@ -140,7 +142,7 @@ public class PostRestController
     {
         try {
             Helper helper = jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_email = '" +
-                    decoder.decodeEmail(email) + "'", new HelperFullMapper());
+                    decoder.decodeEmail(email) + "'", helperFullMapper);
             assert helper != null;
             jdbcTemplate.execute("INSERT INTO document VALUES(default, '" + email + "', '" +
                     description + "', " + helper.getHelperId() + ")");
@@ -153,19 +155,38 @@ public class PostRestController
         }
     }
 
+    @PostMapping("create/uploaderror")
+    public String creationError(@RequestBody String tutorialId)
+    {
+        try {
+            Tutorial tutorial = jdbcTemplate.queryForObject("SELECT * FROM tutorial WHERE approved = 'f' AND " +
+                    "tutorial_id = " + tutorialId, tutorialRowMapper);
+            if(tutorial != null) {
+                jdbcTemplate.execute("DELETE * FROM tutorial WHERE tutorial_id = " + tutorialId);
+                jdbcTemplate.execute("DELETE * FROM instruction_set WHERE tutorial_id = " + tutorialId);
+                jdbcTemplate.execute("DELETE * FROM version WHERE tutorial_id = " + tutorialId);
+                //TODO: DELETE FILES
+            }
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return "ok";
+    }
+
     @PostMapping("/create/tutorial/{email}")
-    public String createTutorial(@PathVariable String email, @RequestBody String request)
+    public String createTutorial(@PathVariable("email") String email, @RequestBody String request)
     {
         Tutorial tutorial = gson.fromJson(request, Tutorial.class);
         Helper helper = jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_email = '" +
-                        decoder.decodeEmail(email) + "'", new HelperFullMapper());
-        if(helper!=null) {
+                        decoder.decodeEmail(email) + "'", helperFullMapper);
+        if(helper != null) {
             try {
                 jdbcTemplate.execute("INSERT INTO tutorial VALUES(default, '" + tutorial.getTutorialName() + "', " +
                         helper.getHelperId() + ", '" + tutorial.getMiniatureName() + "', 0, 'f')");
                 return String.valueOf(Objects.requireNonNull(jdbcTemplate.queryForObject("SELECT * FROM " +
                                 "tutorial WHERE tutorial_name = '" + tutorial.getTutorialName() + "' AND author_id = " +
-                                helper.getHelperId(), new TutorialRowMapper())).getTutorialId());
+                                helper.getHelperId(), tutorialRowMapper)));
             } catch (DataAccessException e) {
                 e.printStackTrace();
                 return null;
@@ -196,7 +217,7 @@ public class PostRestController
     public String createVersions(@RequestBody String request)
     {
         List<Version> versions = gson.fromJson(request, new TypeToken<ArrayList<Version>>(){}.getType());
-        if(versions!=null && !versions.isEmpty()) {
+        if(versions != null && !versions.isEmpty()) {
             try {
                 for(Version version : versions) {
                     jdbcTemplate.execute("INSERT INTO version VALUES(default, '" + version.getText() + "', " +
@@ -217,7 +238,7 @@ public class PostRestController
     public String createMultimedia(@RequestBody String request)
     {
         List<Multimedia> multimedia = gson.fromJson(request, new TypeToken<ArrayList<Multimedia>>(){}.getType());
-        if(multimedia!=null && !multimedia.isEmpty()) {
+        if(multimedia != null && !multimedia.isEmpty()) {
             try {
                 for(Multimedia multi : multimedia) {
                     jdbcTemplate.execute("INSERT INTO multimedia VALUES(default, " + multi.getTutorialId() +
@@ -237,7 +258,7 @@ public class PostRestController
     public String createSounds(@RequestBody String request)
     {
         List<TutorialSound> sounds = gson.fromJson(request, new TypeToken<ArrayList<TutorialSound>>(){}.getType());
-        if(sounds!=null && !sounds.isEmpty()) {
+        if(sounds != null && !sounds.isEmpty()) {
             try {
                 for(TutorialSound sound: sounds) {
                     jdbcTemplate.execute("INSERT INTO tutorial_sound VALUES(default, " + sound.getSoundStart() +
@@ -258,7 +279,7 @@ public class PostRestController
     {
         List<VersionInstruction> versionInstructions = gson.fromJson(request,
                 new TypeToken<ArrayList<VersionInstruction>>(){}.getType());
-        if(versionInstructions!=null && !versionInstructions.isEmpty()) {
+        if(versionInstructions != null && !versionInstructions.isEmpty()) {
             try {
                 for(VersionInstruction versionInstruction : versionInstructions) {
                     jdbcTemplate.execute("INSERT INTO version_instruction VALUES(default, " +
@@ -277,7 +298,7 @@ public class PostRestController
     public String createTutorialLinks(@RequestBody String request)
     {
         List<TutorialLink> tutorialLinks = gson.fromJson(request, new TypeToken<ArrayList<TutorialLink>>(){}.getType());
-        if(tutorialLinks!=null && !tutorialLinks.isEmpty()) {
+        if(tutorialLinks != null && !tutorialLinks.isEmpty()) {
             try {
                 for(TutorialLink tutorialLink : tutorialLinks) {
                     jdbcTemplate.execute("INSERT INTO tutorial_link VALUES(default, " +
@@ -293,10 +314,11 @@ public class PostRestController
     }
 
     @PostMapping("/create/tutorialtags/{name}/{level}")
-    public String createTutorialTags(@RequestBody String request, @PathVariable String name, @PathVariable int level)
+    public String createTutorialTags(@RequestBody String request, @PathVariable("name") String name,
+                                     @PathVariable("level") int level)
     {
         List<TutorialTag> tutorialTags = gson.fromJson(request, new TypeToken<ArrayList<TutorialTag>>(){}.getType());
-        if(tutorialTags!=null && !tutorialTags.isEmpty()) {
+        if(tutorialTags != null && !tutorialTags.isEmpty()) {
             try {
                 jdbcTemplate.execute("INSERT INTO tag VALUES(default, " + name + ", " + level + ")");
                 Tag tag = jdbcTemplate.queryForObject("SELECT * FROM tag WHERE tag_name = '" + name + "'",
@@ -322,7 +344,7 @@ public class PostRestController
     {
         List<VersionMultimedia> versionMultimedia = gson.fromJson(request,
                 new TypeToken<ArrayList<VersionMultimedia>>(){}.getType());
-        if(versionMultimedia!=null && !versionMultimedia.isEmpty()) {
+        if(versionMultimedia != null && !versionMultimedia.isEmpty()) {
             try {
                 for(VersionMultimedia vM: versionMultimedia) {
                     jdbcTemplate.execute("INSERT INTO version_multimedia VALUES(default, " + vM.getMultimediaId() +
@@ -337,10 +359,10 @@ public class PostRestController
     }
 
     @PostMapping("/create/keywords/{uniqueId}")
-    public String createKeywords(@RequestBody String request, @PathVariable Long uniqueId)
+    public String createKeywords(@RequestBody String request, @PathVariable("uniqueId") Long uniqueId)
     {
         List<Keyword> keywords = gson.fromJson(request, new TypeToken<ArrayList<Keyword>>(){}.getType());
-        if(keywords!=null && !keywords.isEmpty()) {
+        if(keywords != null && !keywords.isEmpty()) {
             try {
                 for(Keyword keyword: keywords) {
                     String word = keyword.getKeyword();
@@ -361,10 +383,13 @@ public class PostRestController
     }
 
     @PostMapping(path = "/setfullhelperdetailforemail/{email}/{id}/{name}/{surname}/{title}/{profession}/{phone}")
-    public ResponseEntity<Boolean> uploadHelperDetail(@PathVariable String email, @PathVariable String id,
-                                                      @PathVariable String name, @PathVariable String surname,
-                                                      @PathVariable String title, @PathVariable String profession,
-                                                      @PathVariable String phone)
+    public ResponseEntity<Boolean> uploadHelperDetail(@PathVariable("email") String email,
+                                                      @PathVariable("id") String id,
+                                                      @PathVariable("name") String name,
+                                                      @PathVariable("surname") String surname,
+                                                      @PathVariable("title") String title,
+                                                      @PathVariable("profession") String profession,
+                                                      @PathVariable("phone") String phone)
     {
         String query = "UPDATE helper SET helper_name = '" + name + "', helper_surname = '" + surname + "'";
         if(!Objects.equals(title, "null")) {
