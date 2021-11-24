@@ -182,11 +182,11 @@ public class PostRestController
                         decoder.decodeEmail(email) + "'", helperFullMapper);
         if(helper != null) {
             try {
-                jdbcTemplate.execute("INSERT INTO tutorial VALUES(default, '" + tutorial.getTutorialName() + "', " +
-                        helper.getHelperId() + ", '" + tutorial.getMiniatureName() + "', 0, 'f')");
+                jdbcTemplate.execute("INSERT INTO tutorial VALUES(default, '" + tutorial.getTutorialName() + "', "
+                        + helper.getHelperId() + ", '" + tutorial.getMiniatureName() + "', 0, 'f')");
                 return String.valueOf(Objects.requireNonNull(jdbcTemplate.queryForObject("SELECT * FROM " +
-                                "tutorial WHERE tutorial_name = '" + tutorial.getTutorialName() + "' AND author_id = " +
-                                helper.getHelperId(), tutorialRowMapper)));
+                                "tutorial WHERE tutorial_name = '" + tutorial.getTutorialName() + "' AND author_id = "
+                        + helper.getHelperId(), tutorialRowMapper)).getTutorialId());
             } catch (DataAccessException e) {
                 e.printStackTrace();
                 return null;
@@ -220,10 +220,16 @@ public class PostRestController
         if(versions != null && !versions.isEmpty()) {
             try {
                 for(Version version : versions) {
-                    jdbcTemplate.execute("INSERT INTO version VALUES(default, '" + version.getText() + "', " +
-                            version.getTutorialId() + ", '" + version.isDelayGlobalSound() + "', '" +
-                            version.isHasChildren() + "', '" + version.isHasParent() + "', " +
-                            version.getParentVersionId() + ")");
+                    long parentId = version.getParentVersionId();
+                    if(parentId == -1L) {
+                        jdbcTemplate.execute("INSERT INTO version VALUES(default, '" + version.getText() + "', " +
+                                version.getTutorialId() + ", '" + version.isDelayGlobalSound() + "', '" +
+                                version.isHasChildren() + "', '" + version.isHasParent() + "', NULL)");
+                    } else {
+                        jdbcTemplate.execute("INSERT INTO version VALUES(default, '" + version.getText() + "', " +
+                                version.getTutorialId() + ", '" + version.isDelayGlobalSound() + "', '" +
+                                version.isHasChildren() + "', '" + version.isHasParent() + "', " + parentId + ")");
+                    }
                 }
                 return gson.toJson(jdbcTemplate.query("SELECT * FROM version WHERE tutorial_id = " +
                         versions.get(0).getTutorialId(), new VersionRowMapper()));
@@ -313,24 +319,24 @@ public class PostRestController
         } else return null;
     }
 
-    @PostMapping("/create/tutorialtags/{name}/{level}")
-    public String createTutorialTags(@RequestBody String request, @PathVariable("name") String name,
-                                     @PathVariable("level") int level)
+    @PostMapping("/create/tutorialtags/{tutorialId}/{name}/{level}")
+    public String createTutorialTags(@RequestBody String request, @PathVariable("tutorialId") long tutorialId,
+                                     @PathVariable("name") String name, @PathVariable("level") int level)
     {
         List<TutorialTag> tutorialTags = gson.fromJson(request, new TypeToken<ArrayList<TutorialTag>>(){}.getType());
         if(tutorialTags != null && !tutorialTags.isEmpty()) {
             try {
-                jdbcTemplate.execute("INSERT INTO tag VALUES(default, " + name + ", " + level + ")");
+                jdbcTemplate.execute("INSERT INTO tag VALUES(default, '" + name + "', " + level + ")");
                 Tag tag = jdbcTemplate.queryForObject("SELECT * FROM tag WHERE tag_name = '" + name + "'",
                         new TagRowMapper());
-                if(tag!=null) {
+                if(tag != null) {
                     for(TutorialTag tutorialTag : tutorialTags) {
                         jdbcTemplate.execute("INSERT INTO tutorial_tag VALUES(default, " +
                                 tutorialTag.getTutorialId() + ", " + tutorialTag.getTagId() + ")");
                     }
-                    jdbcTemplate.execute("INSERT INTO tutorial_tag VALUES(default, " + tutorialTags.get(0)
-                            .getTutorialId() + ", " + tag.getTagId() + ")");
-                    return "ok";
+                    jdbcTemplate.execute("INSERT INTO tutorial_tag VALUES(default, " + tutorialId + ", " +
+                            tag.getTagId() + ")");
+                    return String.valueOf(tag.getTagId());
                 } else return null;
             } catch (DataAccessException e) {
                 e.printStackTrace();
