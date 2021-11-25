@@ -6,6 +6,7 @@ import com.orzechowski.aidme.entities.document.DocumentRowMapper;
 import com.orzechowski.aidme.entities.helper.Helper;
 import com.orzechowski.aidme.entities.helper.HelperFullMapper;
 import com.orzechowski.aidme.entities.instructionset.InstructionSet;
+import com.orzechowski.aidme.entities.instructionset.InstructionSetRowMapper;
 import com.orzechowski.aidme.entities.keyword.Keyword;
 import com.orzechowski.aidme.entities.keyword.KeywordRowMapper;
 import com.orzechowski.aidme.entities.multimedia.Multimedia;
@@ -31,8 +32,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -49,6 +52,8 @@ public class PostRestController
     private final Gson gson = new Gson();
     private final TutorialRowMapper tutorialRowMapper = new TutorialRowMapper();
     private final HelperFullMapper helperFullMapper = new HelperFullMapper();
+    private final MultimediaRowMapper multimediaRowMapper = new MultimediaRowMapper();
+    private final VersionRowMapper versionRowMapper = new VersionRowMapper();
 
     public PostRestController(JdbcTemplate jdbcTemplate, ApplicationContext context)
     {
@@ -162,10 +167,51 @@ public class PostRestController
             Tutorial tutorial = jdbcTemplate.queryForObject("SELECT * FROM tutorial WHERE approved = 'f' AND " +
                     "tutorial_id = " + tutorialId, tutorialRowMapper);
             if(tutorial != null) {
-                jdbcTemplate.execute("DELETE * FROM tutorial WHERE tutorial_id = " + tutorialId);
-                jdbcTemplate.execute("DELETE * FROM instruction_set WHERE tutorial_id = " + tutorialId);
-                jdbcTemplate.execute("DELETE * FROM version WHERE tutorial_id = " + tutorialId);
-                //TODO: DELETE FILES
+                for(TutorialSound s : jdbcTemplate.query("SELECT * FROM tutorial_sound WHERE tutorial_id = "
+                        + tutorialId, new TutorialSoundRowMapper())) {
+                    try {
+                        Files.deleteIfExists(new File(pathBase + "sounds/" + s.getFileName() + ".mp3")
+                                .toPath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                for(InstructionSet s : jdbcTemplate.query("SELECT * FROM instruction_set WHERE tutorial_id = " +
+                        tutorialId, new InstructionSetRowMapper())) {
+                    try {
+                        Files.deleteIfExists(new File(pathBase + "narrations/" + s.getNarrationFile() + ".mp3")
+                                .toPath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                for(Multimedia m : jdbcTemplate.query("SELECT * FROM multimedia WHERE tutorial_id = " +
+                        tutorialId, multimediaRowMapper)) {
+                    try {
+                        if (m.isType()) {
+                            Files.deleteIfExists(new File(pathBase + "images/" + m.getFileName() + ".jpeg")
+                                    .toPath());
+                        } else {
+                            Files.deleteIfExists(new File(pathBase + "vids/" + m.getFileName() + ".mp4")
+                                    .toPath());
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                for(Version v : jdbcTemplate.query("SELECT * FROM version WHERE tutorial_id = " + tutorialId,
+                        versionRowMapper)) {
+                    jdbcTemplate.execute("DELETE FROM version_instruction WHERE version_id = " + v.getVersionId());
+                    jdbcTemplate.execute("DELETE FROM version_multimedia WHERE version_id = " + v.getVersionId());
+                    jdbcTemplate.execute("DELETE FROM version_sound WHERE version_id = " + v.getVersionId());
+                }
+                jdbcTemplate.execute("DELETE FROM tutorial_sound WHERE tutorial_id = " + tutorialId);
+                jdbcTemplate.execute("DELETE FROM multimedia WHERE tutorial_id = " + tutorialId);
+                jdbcTemplate.execute("DELETE FROM tutorial_tag WHERE tutorial_id = " + tutorialId);
+                jdbcTemplate.execute("DELETE FROM tutorial_link WHERE origin_id = " + tutorialId);
+                jdbcTemplate.execute("DELETE FROM tutorial WHERE tutorial_id = " + tutorialId);
+                jdbcTemplate.execute("DELETE FROM instruction_set WHERE tutorial_id = " + tutorialId);
+                jdbcTemplate.execute("DELETE FROM version WHERE tutorial_id = " + tutorialId);
             }
         } catch (DataAccessException e) {
             e.printStackTrace();
@@ -232,7 +278,7 @@ public class PostRestController
                     }
                 }
                 return gson.toJson(jdbcTemplate.query("SELECT * FROM version WHERE tutorial_id = " +
-                        versions.get(0).getTutorialId(), new VersionRowMapper()));
+                        versions.get(0).getTutorialId(), versionRowMapper));
             } catch (DataAccessException e) {
                 e.printStackTrace();
                 return null;
@@ -252,7 +298,7 @@ public class PostRestController
                             "', '" + multi.isLoop() + "', " + multi.getPosition() + ")");
                 }
                 return gson.toJson(jdbcTemplate.query("SELECT * FROM multimedia WHERE tutorial_id = " +
-                        multimedia.get(0).getTutorialId(), new MultimediaRowMapper()));
+                        multimedia.get(0).getTutorialId(), multimediaRowMapper));
             } catch (DataAccessException e) {
                 e.printStackTrace();
                 return null;
@@ -353,8 +399,8 @@ public class PostRestController
         if(versionMultimedia != null && !versionMultimedia.isEmpty()) {
             try {
                 for(VersionMultimedia vM: versionMultimedia) {
-                    jdbcTemplate.execute("INSERT INTO version_multimedia VALUES(default, " + vM.getMultimediaId() +
-                            ", " + vM.getVersionId() + ")");
+                    jdbcTemplate.execute("INSERT INTO version_multimedia VALUES(default, " +
+                            vM.getMultimediaId() + ", " + vM.getVersionId() + ")");
                 }
                 return "ok";
             } catch (DataAccessException e) {
@@ -373,8 +419,8 @@ public class PostRestController
                 for(Keyword keyword: keywords) {
                     String word = keyword.getKeyword();
                     jdbcTemplate.execute("INSERT INTO keyword VALUES(default, '" + word + "')");
-                    Keyword insert = jdbcTemplate.queryForObject("SELECT * FROM keyword WHERE keyword = " + word,
-                            new KeywordRowMapper());
+                    Keyword insert = jdbcTemplate.queryForObject("SELECT * FROM keyword WHERE keyword = '" + word +
+                                    "'", new KeywordRowMapper());
                     if (insert != null) {
                         jdbcTemplate.execute("INSERT INTO tag_keyword VALUES(default, " + uniqueId + ", " +
                                 insert.getKeywordId() + ")");

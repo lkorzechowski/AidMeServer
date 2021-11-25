@@ -2,7 +2,7 @@ package com.orzechowski.aidme.entities.helper;
 
 public class Helping
 {
-    private boolean helping;
+    private final boolean helping;
 
     public Helping(boolean value)
     {

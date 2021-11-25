@@ -11,11 +11,11 @@ public class Tag
 {
     @Id
     @Column(name = "tag_id", nullable = false)
-    private long tagId;
+    private final long tagId;
     @Column(name = "tag_name", nullable = false)
-    private String tagName;
+    private final String tagName;
     @Column(name = "tag_level", nullable = false)
-    private int tagLevel;
+    private final int tagLevel;
 
     public Tag(long tagId, String tagName, int tagLevel)
     {

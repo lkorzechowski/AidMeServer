@@ -11,19 +11,19 @@ public class Multimedia
 {
     @Id
     @Column(name = "multimedia_id", nullable = false)
-    private long multimediaId;
+    private final long multimediaId;
     @Column(name = "tutorial_id", nullable = false)
-    private long tutorialId;
+    private final long tutorialId;
     @Column(name = "multimedia_duration", nullable = false)
-    private int displayTime;
+    private final int displayTime;
     @Column(name = "multimedia_type", nullable = false)
-    private boolean type;
+    private final boolean type;
     @Column(name = "multimedia_file_name", nullable = false)
-    private String fileName;
+    private final String fileName;
     @Column(name = "multimedia_loop", nullable = false)
-    private boolean loop;
+    private final boolean loop;
     @Column(name = "multimedia_position", nullable = false)
-    private int position;
+    private final int position;
 
     public Multimedia(long multimediaId, long tutorialId, int displayTime, boolean type, String fileName, boolean loop,
                       int position)

@@ -11,15 +11,15 @@ public class Helper
 {
     @Id
     @Column(name = "helper_id", nullable = false)
-    private long helperId;
+    private final long helperId;
     @Column(name = "helper_name", nullable = false)
-    private String name;
+    private final String name;
     @Column(name = "helper_surname", nullable = false)
-    private String surname;
+    private final String surname;
     @Column(name = "helper_title")
-    private String title;
+    private final String title;
     @Column(name = "helper_profession")
-    private String profession;
+    private final String profession;
     @Column(name = "helper_email")
     private String email;
     @Column(name = "helper_phone")

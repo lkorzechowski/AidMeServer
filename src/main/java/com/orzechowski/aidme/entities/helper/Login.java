@@ -2,8 +2,8 @@ package com.orzechowski.aidme.entities.helper;
 
 public class Login
 {
-    private boolean verified;
-    private boolean helping;
+    private final boolean verified;
+    private final boolean helping;
 
     public Login(boolean verified, boolean helping)
     {

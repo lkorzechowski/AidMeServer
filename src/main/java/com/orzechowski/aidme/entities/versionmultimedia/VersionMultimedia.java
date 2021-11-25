@@ -11,11 +11,11 @@ public class VersionMultimedia
 {
     @Id
     @Column(name = "version_multimedia_id", nullable = false)
-    private long versionMultimediaId;
+    private final long versionMultimediaId;
     @Column(name = "multimedia_id", nullable = false)
-    private long multimediaId;
+    private final long multimediaId;
     @Column(name = "version_id", nullable = false)
-    private long versionId;
+    private final long versionId;
 
     public VersionMultimedia(long versionMultimediaId, long multimediaId, long versionId)
     {

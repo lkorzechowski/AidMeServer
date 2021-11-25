@@ -11,9 +11,9 @@ public class Keyword
 {
     @Id
     @Column(name = "keyword_id", nullable = false)
-    private long keywordId;
+    private final long keywordId;
     @Column(name = "keyword", nullable = false)
-    private String keyword;
+    private final String keyword;
 
     public Keyword(long keywordId, String word)
     {

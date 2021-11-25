@@ -11,11 +11,11 @@ public class VersionInstruction
 {
     @Id
     @Column(name = "version_instruction_id", nullable = false)
-    private long versionInstructionId;
+    private final long versionInstructionId;
     @Column(name = "version_id", nullable = false)
-    private long versionId;
+    private final long versionId;
     @Column(name = "instruction_position", nullable = false)
-    private int instructionPosition;
+    private final int instructionPosition;
 
     public VersionInstruction(long versionInstructionId, long versionId, int instructionPosition)
     {

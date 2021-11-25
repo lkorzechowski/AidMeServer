@@ -11,19 +11,19 @@ public class InstructionSet
 {
     @Id
     @Column(name = "instruction_set_id", nullable = false)
-    private long instructionSetId;
+    private final long instructionSetId;
     @Column(name = "instruction_title", nullable = false)
-    private String title;
+    private final String title;
     @Column(name = "instructions", nullable = false)
-    private String instructions;
+    private final String instructions;
     @Column(name = "instruction_duration", nullable = false)
-    private int time;
+    private final int time;
     @Column(name = "tutorial_id", nullable = false)
-    private long tutorialId;
+    private final long tutorialId;
     @Column(name = "instruction_position", nullable = false)
-    private int position;
+    private final int position;
     @Column(name = "instruction_narration_file")
-    private String narrationFile;
+    private final String narrationFile;
 
     public InstructionSet(long instructionSetId, String title, String instructions, int time, long tutorialId,
                           int position, String narrationName)

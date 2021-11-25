@@ -11,17 +11,17 @@ public class Version
 {
     @Id
     @Column(name = "version_id", nullable = false)
-    private long versionId;
+    private final long versionId;
     @Column(name = "version_text", nullable = false)
-    private String text;
+    private final String text;
     @Column(name = "tutorial_id", nullable = false)
-    private long tutorialId;
+    private final long tutorialId;
     @Column(name = "version_sound_delay", nullable = false)
-    private boolean delayGlobalSound;
+    private final boolean delayGlobalSound;
     @Column(name = "version_has_children", nullable = false)
-    private boolean hasChildren;
+    private final boolean hasChildren;
     @Column(name = "version_has_parent", nullable = false)
-    private boolean hasParent;
+    private final boolean hasParent;
     @Column(name = "parent_version_id")
     private long parentVersionId;
 

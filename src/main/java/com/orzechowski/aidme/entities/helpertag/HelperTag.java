@@ -11,11 +11,11 @@ public class HelperTag
 {
     @Id
     @Column(name = "helper_tag_id", nullable = false)
-    private long helperTagId;
+    private final long helperTagId;
     @Column(name = "helper_id", nullable = false)
-    private long helperId;
+    private final long helperId;
     @Column(name = "tag_id", nullable = false)
-    private long tagId;
+    private final long tagId;
 
     public HelperTag(long helperTagId, long helperId, long tagId)
     {

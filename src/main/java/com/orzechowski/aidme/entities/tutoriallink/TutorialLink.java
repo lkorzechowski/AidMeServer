@@ -11,13 +11,13 @@ public class TutorialLink
 {
     @Id
     @Column(name = "tutorial_link_id", nullable = false)
-    private long tutorialLinkId;
+    private final long tutorialLinkId;
     @Column(name = "tutorial_id", nullable = false)
-    private long tutorialId;
+    private final long tutorialId;
     @Column(name = "origin_id", nullable = false)
-    private long originId;
+    private final long originId;
     @Column(name = "instruction_number", nullable = false)
-    private int instructionNumber;
+    private final int instructionNumber;
 
     public TutorialLink(long tutorialLinkId, long tutorialId, long originId, int instructionNumber)
     {

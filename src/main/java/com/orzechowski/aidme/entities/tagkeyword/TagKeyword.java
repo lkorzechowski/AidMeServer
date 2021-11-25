@@ -11,11 +11,11 @@ public class TagKeyword
 {
     @Id
     @Column(name = "tag_keyword_id", nullable = false)
-    private long tagKeywordId;
+    private final long tagKeywordId;
     @Column(name = "keyword_id", nullable = false)
-    private long keywordId;
+    private final long keywordId;
     @Column(name = "tag_id", nullable = false)
-    private long tagId;
+    private final long tagId;
 
     public TagKeyword(long tagKeywordId, long keywordId, long tagId)
     {

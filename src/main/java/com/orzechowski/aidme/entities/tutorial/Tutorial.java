@@ -11,15 +11,15 @@ public class Tutorial
 {
     @Id
     @Column(name = "tutorial_id", nullable = false)
-    private long tutorialId;
+    private final long tutorialId;
     @Column(name = "tutorial_name", nullable = false)
-    private String tutorialName;
+    private final String tutorialName;
     @Column(name = "author_id", nullable = false)
-    private long authorId;
+    private final long authorId;
     @Column(name = "tutorial_miniature_file", nullable = false)
-    private String miniatureName;
+    private final String miniatureName;
     @Column(name = "tutorial_rating", nullable = false)
-    private float rating;
+    private final float rating;
 
     public Tutorial(long tutorialId, String tutorialName, long authorId, String miniatureName, float rating)
     {

@@ -11,7 +11,7 @@ public class BlockedUser
 {
     @Id
     @Column(name = "blocked_phone_number", nullable = false)
-    private String phoneNumber;
+    private final String phoneNumber;
 
     public BlockedUser(String phoneNumber)
     {
