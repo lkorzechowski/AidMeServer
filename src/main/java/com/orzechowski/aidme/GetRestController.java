@@ -47,7 +47,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,7 +58,6 @@ public class GetRestController
     @Autowired
     private final ApplicationContext context;
     private final static String pathBase = "gs://aidme/";
-    private final List<Helper> occupiedHelpers = new LinkedList<>();
     private final Decoder decoder = new Decoder();
     private final HelperFullMapper helperFullMapper = new HelperFullMapper();
     private final InstructionSetRowMapper instructionSetRowMapper = new InstructionSetRowMapper();
@@ -70,9 +68,6 @@ public class GetRestController
     {
         this.jdbcTemplate = jdbcTemplate;
         this.context = context;
-        Helper admin = jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_profession = 'admin'",
-                helperFullMapper);
-        occupiedHelpers.add(admin);
     }
 
     @GetMapping("/login/{email}")
@@ -84,8 +79,8 @@ public class GetRestController
         if(loginResponse!=null) {
             return ResponseEntity.ok(loginResponse);
         } else {
-            jdbcTemplate.execute("INSERT INTO helper VALUES default, null, null, null, null, '" + email +
-                    "', null, false, false");
+            jdbcTemplate.execute("INSERT INTO helper VALUES(default, null, null, null, null, '" + email +
+                    "', null, 'f', 'f')");
             return ResponseEntity.ok(new Login(false, false));
         }
     }
@@ -118,20 +113,22 @@ public class GetRestController
     public ResponseEntity<Helper> helperNumber(@PathVariable long id)
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.queryForObject("SELECT h.* FROM helper h" +
-                            "JOIN helper_tags ht ON h.helper_id = ht.helper_id " +
-                            "JOIN tags t ON ht.tag_id = t.tag_id WHERE t.tag_id = " + id, helperFullMapper));
+            List<Helper> helpers = jdbcTemplate.query("SELECT h.* FROM helper h JOIN helper_tag ht ON " +
+                            "h.helper_id = ht.helper_id WHERE h.helping = 't' AND h.helper_profession != 'admin' " +
+                            "AND ht.tag_id = " + id, helperFullMapper);
+            if(!helpers.isEmpty()) return ResponseEntity.ok(helpers.get(0));
+            else return null;
         } catch (DataAccessException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     @GetMapping("/tutorials")
     public ResponseEntity<List<Tutorial>> tutorials()
     {
         try {
-            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial WHERE approved = 'true'",
+            return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial WHERE approved = 't'",
                     new TutorialRowMapper()));
         } catch (DataAccessException e) {
             e.printStackTrace();
@@ -451,37 +448,6 @@ public class GetRestController
         } else {
             this.jdbcTemplate.execute("UPDATE helper SET helping = 'f' WHERE helper_email = '" + email + "'");
             return ResponseEntity.ok(new Helping(false));
-        }
-    }
-
-    @GetMapping("/phonenumber/{tagId}")
-    public ResponseEntity<Helper> requestPhoneNumber(@PathVariable Long tagId)
-    {
-        try {
-            List<Helper> helpers = jdbcTemplate.query("SELECT * FROM helper h JOIN helper_tag ht ON h.helper_id =" +
-                    "ht.helper_id WHERE h.helping = 'true' AND ht.tag_id = " + tagId, helperFullMapper);
-            helpers.removeIf(occupiedHelpers::contains);
-            if(!helpers.isEmpty()) {
-                Helper chosen = helpers.get(0);
-                occupiedHelpers.add(chosen);
-                return ResponseEntity.ok(chosen);
-            } else return null;
-        } catch (DataAccessException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    @GetMapping("/callended/{email}")
-    public ResponseEntity<Boolean> removeFromOccupied(@PathVariable String email)
-    {
-        try {
-            occupiedHelpers.remove(jdbcTemplate.queryForObject("SELECT * FROM helper WHERE helper_email = " +
-                            decoder.decodeEmail(email), helperFullMapper));
-            return ResponseEntity.ok(true);
-        } catch (DataAccessException e) {
-            e.printStackTrace();
-            return null;
         }
     }
 

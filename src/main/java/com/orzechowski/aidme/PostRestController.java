@@ -434,7 +434,7 @@ public class PostRestController
         } else return null;
     }
 
-    @PostMapping(path = "/setfullhelperdetailforemail/{email}/{id}/{name}/{surname}/{title}/{profession}/{phone}")
+    @PostMapping("/setfullhelperdetailforemail/{email}/{id}/{name}/{surname}/{title}/{profession}/{phone}")
     public ResponseEntity<Boolean> uploadHelperDetail(@PathVariable("email") String email,
                                                       @PathVariable("id") String id,
                                                       @PathVariable("name") String name,
@@ -457,6 +457,18 @@ public class PostRestController
             jdbcTemplate.execute(query + " WHERE helper_id = " + id + " AND helper_email = '" + email + "'");
             return ResponseEntity.ok(true);
         } catch (DataAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @PostMapping("/switchoccupied/{number}")
+    public String switchOccupied(@PathVariable("number") int number)
+    {
+        try {
+            jdbcTemplate.execute("UPDATE helper set helping = 'f' WHERE helper_phone = '" + number + "'");
+            return "ok";
+        } catch(DataAccessException e) {
             e.printStackTrace();
             return null;
         }
