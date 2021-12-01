@@ -2,6 +2,8 @@ package com.orzechowski.aidme;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.orzechowski.aidme.entities.blockeduser.BlockedUser;
+import com.orzechowski.aidme.entities.blockeduser.BlockedUserRowMapper;
 import com.orzechowski.aidme.entities.document.DocumentRowMapper;
 import com.orzechowski.aidme.entities.helper.Helper;
 import com.orzechowski.aidme.entities.helper.HelperFullMapper;
@@ -481,6 +483,21 @@ public class PostRestController
             jdbcTemplate.execute("INSERT INTO blocked_user VALUES('" + number + "')");
             jdbcTemplate.execute("UPDATE helper set verified = 'f' WHERE helper_phone = '" + number + "'");
             return "ok";
+        } catch(DataAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @PostMapping("/check/{number}")
+    public String verifyNotBlocked(@PathVariable String number)
+    {
+        try {
+            BlockedUser blocked = jdbcTemplate.queryForObject("SELECT * FROM blocked_user WHERE " +
+                            "blocked_phone_number = '" + number + "'", new BlockedUserRowMapper());
+            if(blocked == null) {
+                return "ok";
+            } else return null;
         } catch(DataAccessException e) {
             e.printStackTrace();
             return null;
