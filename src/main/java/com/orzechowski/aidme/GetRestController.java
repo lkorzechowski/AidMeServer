@@ -109,15 +109,19 @@ public class GetRestController
         }
     }
 
-    @GetMapping("/number/{id}")
-    public ResponseEntity<Helper> helperNumber(@PathVariable long id)
+    @GetMapping("/number/{tagId}/{callerId}")
+    public ResponseEntity<Helper> helperNumber(@PathVariable("tagId") long tagId,
+                                               @PathVariable("callerId") String callerId)
     {
         try {
-            List<Helper> helpers = jdbcTemplate.query("SELECT h.* FROM helper h JOIN helper_tag ht ON " +
-                            "h.helper_id = ht.helper_id WHERE h.helping = 't' AND h.helper_profession != 'admin' " +
-                            "AND ht.tag_id = " + id, helperFullMapper);
-            if(!helpers.isEmpty()) return ResponseEntity.ok(helpers.get(0));
-            else return null;
+            if(jdbcTemplate.queryForObject("SELECT * FROM blocked_user WHERE blocked_number = '" + callerId + "'",
+                    new BlockedUserRowMapper()) == null) {
+                List<Helper> helpers = jdbcTemplate.query("SELECT h.* FROM helper h JOIN helper_tag ht ON " +
+                        "h.helper_id = ht.helper_id WHERE h.helping = 't' AND h.helper_profession != 'admin' " +
+                        "AND ht.tag_id = " + tagId, helperFullMapper);
+                if (!helpers.isEmpty()) return ResponseEntity.ok(helpers.get(0));
+                else return null;
+            } else return null;
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;

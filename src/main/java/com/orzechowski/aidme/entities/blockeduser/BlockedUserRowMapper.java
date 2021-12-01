@@ -10,6 +10,6 @@ public class BlockedUserRowMapper implements RowMapper<BlockedUser>
     @Override
     public BlockedUser mapRow(ResultSet rs, int rowNum) throws SQLException
     {
-        return new BlockedUser(rs.getString(1));
+        return new BlockedUser(rs.getString(1), rs.getString(2));
     }
 }

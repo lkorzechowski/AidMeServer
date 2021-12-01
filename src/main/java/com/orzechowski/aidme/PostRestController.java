@@ -2,8 +2,6 @@ package com.orzechowski.aidme;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.orzechowski.aidme.entities.blockeduser.BlockedUser;
-import com.orzechowski.aidme.entities.blockeduser.BlockedUserRowMapper;
 import com.orzechowski.aidme.entities.document.DocumentRowMapper;
 import com.orzechowski.aidme.entities.helper.Helper;
 import com.orzechowski.aidme.entities.helper.HelperFullMapper;
@@ -38,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -464,11 +463,13 @@ public class PostRestController
         }
     }
 
-    @PostMapping("/switchoccupied/{number}")
-    public String switchOccupied(@PathVariable("number") int number)
+    @PostMapping("/switchoccupied/{number}/{id}")
+    public String switchOccupied(@PathVariable("number") int number, @PathVariable("id") String id)
     {
         try {
             jdbcTemplate.execute("UPDATE helper set helping = 'f' WHERE helper_phone = '" + number + "'");
+            jdbcTemplate.execute("INSERT INTO call VALUES(default, '" + id + "', '" +  number + "', '" +
+                    LocalDateTime.now() + "')");
             return "ok";
         } catch(DataAccessException e) {
             e.printStackTrace();
@@ -476,28 +477,15 @@ public class PostRestController
         }
     }
 
-    @PostMapping("/report")
-    public String reportUser(@RequestBody String number)
+    @PostMapping("/report/{by}")
+    public String reportUser(@RequestBody String number, @PathVariable("by") String by)
     {
         try {
-            jdbcTemplate.execute("INSERT INTO blocked_user VALUES('" + number + "')");
+            if(Objects.equals(by, "n")) jdbcTemplate.execute("INSERT INTO blocked_user VALUES('" + number +
+                    "', NULL)");
+            else jdbcTemplate.execute("INSERT INTO blocked_user VALUES('" + number + "', '" + by + "')");
             jdbcTemplate.execute("UPDATE helper set verified = 'f' WHERE helper_phone = '" + number + "'");
             return "ok";
-        } catch(DataAccessException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    @PostMapping("/check/{number}")
-    public String verifyNotBlocked(@PathVariable String number)
-    {
-        try {
-            BlockedUser blocked = jdbcTemplate.queryForObject("SELECT * FROM blocked_user WHERE " +
-                            "blocked_phone_number = '" + number + "'", new BlockedUserRowMapper());
-            if(blocked == null) {
-                return "ok";
-            } else return null;
         } catch(DataAccessException e) {
             e.printStackTrace();
             return null;

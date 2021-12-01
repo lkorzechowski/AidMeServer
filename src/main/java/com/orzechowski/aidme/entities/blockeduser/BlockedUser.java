@@ -10,16 +10,24 @@ import javax.persistence.Table;
 public class BlockedUser
 {
     @Id
-    @Column(name = "blocked_phone_number", nullable = false)
-    private final String phoneNumber;
+    @Column(name = "blocked_number", nullable = false)
+    private final String number;
+    @Column(name = "reported_by")
+    private final String reportedBy;
 
-    public BlockedUser(String phoneNumber)
+    public BlockedUser(String number, String reportedBy)
     {
-        this.phoneNumber = phoneNumber;
+        this.number = number;
+        this.reportedBy = reportedBy;
     }
 
-    public String getPhoneNumber()
+    public String getNumber()
     {
-        return phoneNumber;
+        return number;
+    }
+
+    public String getReportedBy()
+    {
+        return reportedBy;
     }
 }
