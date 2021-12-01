@@ -473,4 +473,17 @@ public class PostRestController
             return null;
         }
     }
+
+    @PostMapping("/report")
+    public String reportUser(@RequestBody String number)
+    {
+        try {
+            jdbcTemplate.execute("INSERT INTO blocked_user VALUES('" + number + "')");
+            jdbcTemplate.execute("UPDATE helper set verified = 'f' WHERE helper_phone = '" + number + "'");
+            return "ok";
+        } catch(DataAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
