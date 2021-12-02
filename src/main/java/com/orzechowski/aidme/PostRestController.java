@@ -11,6 +11,7 @@ import com.orzechowski.aidme.entities.keyword.Keyword;
 import com.orzechowski.aidme.entities.keyword.KeywordRowMapper;
 import com.orzechowski.aidme.entities.multimedia.Multimedia;
 import com.orzechowski.aidme.entities.multimedia.MultimediaRowMapper;
+import com.orzechowski.aidme.entities.rating.RatingRowMapper;
 import com.orzechowski.aidme.entities.tag.Tag;
 import com.orzechowski.aidme.entities.tag.TagRowMapper;
 import com.orzechowski.aidme.entities.tutorial.Tutorial;
@@ -499,6 +500,27 @@ public class PostRestController
             jdbcTemplate.execute("INSERT INTO approval VALUES(default, '" + decoder.decodeEmail(email) + "', '" +
                     vote + "')");
             return "ok";
+        } catch(DataAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @PostMapping("/rating/{id}/{rate}/{device}")
+    public String rating(@PathVariable("id") long id, @PathVariable("rate") int rate,
+                         @PathVariable("device") String deviceId)
+    {
+        try {
+            Tutorial tutorial = jdbcTemplate.queryForObject("SELECT * FROM tutorial WHERE tutorial_id = " + id,
+                    tutorialRowMapper);
+            if(tutorial != null) {
+                int size = jdbcTemplate.query("SELECT * FROM rating WHERE tutorial_id = " + id,
+                        new RatingRowMapper()).size();
+                jdbcTemplate.execute("INSERT INTO rating VALUES(default, " + id + ", '" + deviceId + "', " + rate);
+                jdbcTemplate.execute("UPDATE tutorial SET tutorial_rating = " +
+                        (tutorial.getRating() * size + rate) / (size + 1));
+                return "ok";
+            } else return null;
         } catch(DataAccessException e) {
             e.printStackTrace();
             return null;
