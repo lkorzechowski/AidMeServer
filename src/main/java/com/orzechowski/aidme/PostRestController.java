@@ -491,4 +491,17 @@ public class PostRestController
             return null;
         }
     }
+
+    @PostMapping("/approval/{email}/{vote}")
+    public String approval(@PathVariable("email") String email, @PathVariable("vote") String vote)
+    {
+        try {
+            jdbcTemplate.execute("INSERT INTO approval VALUES(default, '" + decoder.decodeEmail(email) + "', '" +
+                    vote + "')");
+            return "ok";
+        } catch(DataAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

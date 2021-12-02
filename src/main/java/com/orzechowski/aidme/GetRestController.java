@@ -1,5 +1,6 @@
 package com.orzechowski.aidme;
 
+import com.orzechowski.aidme.entities.approval.ApprovalRowMapper;
 import com.orzechowski.aidme.entities.blockeduser.BlockedUser;
 import com.orzechowski.aidme.entities.blockeduser.BlockedUserRowMapper;
 import com.orzechowski.aidme.entities.category.Category;
@@ -134,6 +135,26 @@ public class GetRestController
         try {
             return ResponseEntity.ok(jdbcTemplate.query("SELECT * FROM tutorial WHERE approved = 't'",
                     new TutorialRowMapper()));
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @GetMapping("/unverifiedtutorials/{email}")
+    public ResponseEntity<List<Tutorial>> unverifiedTutorials(@PathVariable("email") String email)
+    {
+        try {
+            email = decoder.decodeEmail(email);
+            List<Tutorial> tutorials = jdbcTemplate.query("SELECT * FROM tutorial WHERE approved = 'f'",
+                    new TutorialRowMapper());
+            for(Tutorial tutorial : tutorials) {
+                if(jdbcTemplate.queryForObject("SELECT * FROM approval WHERE approver_email = '" + email +
+                        "' AND tutorial_id = " + tutorial.getTutorialId(), new ApprovalRowMapper()) != null) {
+                    tutorials.remove(tutorial);
+                }
+            }
+            return ResponseEntity.ok(tutorials);
         } catch (DataAccessException e) {
             e.printStackTrace();
             return null;
