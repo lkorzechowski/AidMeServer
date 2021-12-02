@@ -17,9 +17,9 @@ public class Rating
     @Column(name = "device_id")
     private final String deviceId;
     @Column(name = "rating", nullable = false)
-    private final float rating;
+    private final int rating;
 
-    public Rating(long ratingId, long tutorialId, String deviceId, float rating)
+    public Rating(long ratingId, long tutorialId, String deviceId, int rating)
     {
         this.ratingId = ratingId;
         this.tutorialId = tutorialId;
