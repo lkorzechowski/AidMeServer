@@ -516,7 +516,8 @@ public class PostRestController
             if(tutorial != null) {
                 int size = jdbcTemplate.query("SELECT * FROM rating WHERE tutorial_id = " + id,
                         new RatingRowMapper()).size();
-                jdbcTemplate.execute("INSERT INTO rating VALUES(default, " + id + ", '" + deviceId + "', " + rate);
+                jdbcTemplate.execute("INSERT INTO rating VALUES(default, " + id + ", '" + deviceId + "', " + rate +
+                        ")");
                 jdbcTemplate.execute("UPDATE tutorial SET tutorial_rating = " +
                         (tutorial.getRating() * size + rate) / (size + 1));
                 return "ok";
