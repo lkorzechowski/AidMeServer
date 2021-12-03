@@ -519,7 +519,7 @@ public class PostRestController
                 jdbcTemplate.execute("INSERT INTO rating VALUES(default, " + id + ", '" + deviceId + "', " + rate +
                         ")");
                 jdbcTemplate.execute("UPDATE tutorial SET tutorial_rating = " +
-                        (tutorial.getRating() * size + rate) / (size + 1));
+                        (tutorial.getRating() * size + rate) / (size + 1) + " WHERE tutorial_id = " + id);
                 return "ok";
             } else return null;
         } catch(DataAccessException e) {
