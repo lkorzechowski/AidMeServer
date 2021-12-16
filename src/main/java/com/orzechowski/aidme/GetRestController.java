@@ -75,11 +75,11 @@ public class GetRestController
     public ResponseEntity<Login> login(@PathVariable String email)
     {
         email = decoder.decodeEmail(email);
-        Login loginResponse = jdbcTemplate.queryForObject("SELECT verified, helping FROM helper " +
-                "WHERE helper_email = '" + email + "'", new HelperLoginMapper());
-        if(loginResponse!=null) {
+        try {
+            Login loginResponse = jdbcTemplate.queryForObject("SELECT verified, helping FROM helper " +
+                    "WHERE helper_email = '" + email + "'", new HelperLoginMapper());
             return ResponseEntity.ok(loginResponse);
-        } else {
+        } catch (DataAccessException e) {
             jdbcTemplate.execute("INSERT INTO helper VALUES(default, null, null, null, null, '" + email +
                     "', null, 'f', 'f')");
             return ResponseEntity.ok(new Login(false, false));
